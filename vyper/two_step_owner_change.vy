@@ -1,12 +1,10 @@
+# Author: Sören Steiger, github.com/ssteiger
+
 # ----------------------------------------------------------
-# Two step function call:
+# Two step owner change:
 
-# Require a function call to first be initiated (1. step)
-# and then to be executed in the next n minutes (2. step)
-
-# Example use case: Changing the owner of a contract
-
-# (c) by Sören Steiger with ssteiger 2017. The MIT Licence.
+# 1. step: Signal intent to change owner of this contract
+# 2. step: Executed actual change (within the next n minutes)
 
 # ---------------------- from the docs ----------------------
 # Public variables:
@@ -28,6 +26,7 @@
 # timedelta | 1 sec | uint256   | is a number of seconds
 # ----------------------------------------------------------
 
+# owner of this contract
 owner: public(address)
 # flag for indicating if 1. step has been completed
 flag_init: public(bool)
@@ -36,7 +35,7 @@ flag_init: public(bool)
 time_of_initialization: public(timestamp)
 # time allowed to pass between completion of 1. step and completion of 2. step
 window: public(timedelta)
-# helper for the address of the new owner
+# helper for temporally storing the address of the new owner
 new_owner_candidate: public(address)
 
 
