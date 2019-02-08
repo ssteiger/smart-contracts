@@ -101,7 +101,6 @@ def balanceOf(_owner: address) -> uint256:
 # NOTE: Transfers of 0 values MUST be treated as normal transfers and fire the
 # Transfer event.
 @public
-@constant
 def transfer(_to: address, _value: uint256) -> bool:
     # check if balance is sufficient
     assert self.balances[msg.sender] >= _value
