@@ -129,13 +129,13 @@ def transfer(_to: address, _value: uint256) -> bool:
 @public
 def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
     # check if balance is sufficient
-    assert self.balances[msg.sender] >= _value
+    assert self.balances[_from] >= _value
     # substract balance from sender
-    self.balances[msg.sender] -= _value
+    self.balances[_from] -= _value
     # add balance to recipient
     self.balances[_to] += _value
     # fire transfer event
-    log.Transfer({msg.sender, _to, _value})
+    log.Transfer({_from, _to, _value})
     return True
 
 
