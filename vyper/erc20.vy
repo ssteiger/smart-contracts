@@ -23,13 +23,13 @@ Approval: event({_owner: indexed(address), _spender: indexed(address), _value: u
 # Returns the name of the token - e.g. "MyToken".
 # OPTIONAL - This method can be used to improve usability, but interfaces and
 #            other contracts MUST NOT expect these values to be present.
-name: public(string[16]) # TODO: check if correct size
+name: public(string[16]) # TODO: is this an acceptable size?
 
 # ----- symbol -----
 # Returns the symbol of the token. E.g. "HIX".
 # OPTIONAL - This method can be used to improve usability, but interfaces and
 #            other contracts MUST NOT expect these values to be present.
-symbol: public(string[16]) # TODO: check if correct size
+symbol: public(string[16]) # TODO: is this an acceptable size?
 
 # ----- decimals -----
 # Returns the number of decimals the token uses - e.g. 8, means to divide
@@ -60,7 +60,6 @@ def __init__(_name: string, _symbol: string, _decimals: uint256, total_supply: u
 # METHODS:
 
 # NOTES:
-# The following specifications use syntax from Solidity 0.4.17 (or above)
 # Callers MUST handle false from returns (bool success).
 # Callers MUST NOT assume that false is never returned!
 
