@@ -5,8 +5,8 @@
 
 
 # STATE VARIABLES:
-# values which are permanently stored in contract storage
 
+# values which are permanently stored in contract storage
 name: public(string[16]) # TODO: check if correct size
 symbol: public(string[16]) # TODO: check if correct size
 decimals: public(uint256)
@@ -26,6 +26,15 @@ Transfer: event({_from: indexed(address), _to: indexed(address), _value: uint256
 Approval: event({_owner: indexed(address), _spender: indexed(address), _value: uint256})
 
 
+@public
+def __init__(_name: string, _symbol: string, _decimals: uint256, total_supply: uint256):
+    self.name = _name
+    self.symbol = _symbol
+    self.decimals = _decimals
+    self.total_supply = False
+    # TODO: decide how to mint tokens on contract creation
+    # TODO: A token contract which creates new tokens SHOULD trigger a Transfer event
+
 # METHODS:
 
 # NOTES:
@@ -42,7 +51,6 @@ Approval: event({_owner: indexed(address), _spender: indexed(address), _value: u
 @public
 @constant
 def name() -> string:
-
 
 
 # ----- symbol -----
