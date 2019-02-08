@@ -88,7 +88,7 @@ def transfer(_to: address, _value: uint256) -> bool:
     # add balance to recipient
     self.balances[_to] += _value
     # fire transfer event
-    log.Transfer({msg.sender, _to, _value})
+    log.Transfer(msg.sender, _to, _value)
     return True
 
 
@@ -117,7 +117,7 @@ def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
     # add balance to recipient
     self.balances[_to] += _value
     # fire transfer event
-    log.Transfer({_from, _to, _value})
+    log.Transfer(_from, _to, _value)
     return True
 
 
@@ -136,7 +136,7 @@ def approve(_spender: address, _value: uint256) -> bool:
     # TODO: is this correct?
     self.approved[msg.sender][_spender] = _value
     # fire approval event
-    log.Approval({msg.sender, _spender, _value})
+    log.Approval(msg.sender, _spender, _value)
     return True
 
 
