@@ -3,6 +3,18 @@
 
 # ERC20 Token Standard (https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md)
 
+# EVENTS:
+
+# ----- Transfer -----
+# MUST trigger when tokens are transferred, including zero value transfers.
+# A token contract which creates new tokens SHOULD trigger a Transfer event
+# with the _from address set to 0x0 when tokens are created.
+Transfer: event({_from: indexed(address), _to: indexed(address), _value: uint256})
+
+# ----- Approval -----
+# MUST trigger on any successful call to approve(address _spender, uint256 _value).
+Approval: event({_owner: indexed(address), _spender: indexed(address), _value: uint256})
+
 
 # STATE VARIABLES:
 # values which are permanently stored in contract storage
@@ -35,19 +47,6 @@ balances: map(address, uint256)
 approved: map(address, map(address, uint256))
 
 
-# EVENTS:
-
-# ----- Transfer -----
-# MUST trigger when tokens are transferred, including zero value transfers.
-# A token contract which creates new tokens SHOULD trigger a Transfer event
-# with the _from address set to 0x0 when tokens are created.
-Transfer: event({_from: indexed(address), _to: indexed(address), _value: uint256})
-
-# ----- Approval -----
-# MUST trigger on any successful call to approve(address _spender, uint256 _value).
-Approval: event({_owner: indexed(address), _spender: indexed(address), _value: uint256})
-
-
 @public
 def __init__(_name: string, _symbol: string, _decimals: uint256, total_supply: uint256):
     self.name = _name
@@ -56,6 +55,7 @@ def __init__(_name: string, _symbol: string, _decimals: uint256, total_supply: u
     self.total_supply = total_supply
     # TODO: decide how to mint tokens on contract creation
     # TODO: A token contract which creates new tokens SHOULD trigger a Transfer event
+
 
 # METHODS:
 
@@ -91,7 +91,6 @@ def transfer(_to: address, _value: uint256) -> bool:
     # fire transfer event
     log.Transfer({msg.sender, _to, _value})
     return True
-
 
 
 # ----- transferFrom -----
