@@ -54,7 +54,7 @@ def __init__(_name: string, _symbol: string, _decimals: uint256, total_supply: u
     self.decimals = _decimals
     self.total_supply = total_supply * 10 ** _decimals
     # TODO: decide how to mint tokens on contract creation
-    # TODO: A token contract which creates new tokens SHOULD trigger a Transfer event
+    log.Transfer(ZERO_ADDRESS, msg.sender, self.total_supply)
 
 
 # METHODS:
