@@ -4,6 +4,15 @@
 # ERC20 Token Standard (https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md)
 
 
+# STATE VARIABLES:
+# values which are permanently stored in contract storage
+
+name: public(string[16]) # TODO: check if correct size
+symbol: public(string[16]) # TODO: check if correct size
+decimals: public(uint256)
+total_supply: public(uint256)
+
+
 # EVENTS:
 
 # ----- Transfer -----
