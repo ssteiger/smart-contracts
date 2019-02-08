@@ -5,12 +5,31 @@
 
 
 # STATE VARIABLES:
-
 # values which are permanently stored in contract storage
+
+# ----- name -----
+# Returns the name of the token - e.g. "MyToken".
+# OPTIONAL - This method can be used to improve usability, but interfaces and
+#            other contracts MUST NOT expect these values to be present.
 name: public(string[16]) # TODO: check if correct size
+
+# ----- symbol -----
+# Returns the symbol of the token. E.g. "HIX".
+# OPTIONAL - This method can be used to improve usability, but interfaces and
+#            other contracts MUST NOT expect these values to be present.
 symbol: public(string[16]) # TODO: check if correct size
+
+# ----- decimals -----
+# Returns the number of decimals the token uses - e.g. 8, means to divide
+# the token amount by 100000000 to get its user representation.
+# OPTIONAL - This method can be used to improve usability, but interfaces and
+#            other contracts MUST NOT expect these values to be present.
 decimals: public(uint256)
+
+# ----- totalSupply -----
+# Returns the total token supply.
 total_supply: public(uint256)
+
 balances: map(address, uint256)
 # TODO: is this correct?
 approved: map(address, map(address, uint256))
@@ -34,7 +53,7 @@ def __init__(_name: string, _symbol: string, _decimals: uint256, total_supply: u
     self.name = _name
     self.symbol = _symbol
     self.decimals = _decimals
-    self.total_supply = False
+    self.total_supply = total_supply
     # TODO: decide how to mint tokens on contract creation
     # TODO: A token contract which creates new tokens SHOULD trigger a Transfer event
 
@@ -44,45 +63,6 @@ def __init__(_name: string, _symbol: string, _decimals: uint256, total_supply: u
 # The following specifications use syntax from Solidity 0.4.17 (or above)
 # Callers MUST handle false from returns (bool success).
 # Callers MUST NOT assume that false is never returned!
-
-
-
-# ----- name -----
-# Returns the name of the token - e.g. "MyToken".
-# OPTIONAL - This method can be used to improve usability, but interfaces and
-#            other contracts MUST NOT expect these values to be present.
-@public
-@constant
-def name() -> string:
-    return self.name
-
-# ----- symbol -----
-# Returns the symbol of the token. E.g. "HIX".
-# OPTIONAL - This method can be used to improve usability, but interfaces and
-#            other contracts MUST NOT expect these values to be present.
-@public
-@constant
-def symbol() -> string:
-    return self.symbol
-
-
-# ----- decimals -----
-# Returns the number of decimals the token uses - e.g. 8, means to divide
-# the token amount by 100000000 to get its user representation.
-# OPTIONAL - This method can be used to improve usability, but interfaces and
-#            other contracts MUST NOT expect these values to be present.
-@public
-@constant
-def decimals() -> uint256:
-    return self.decimals
-
-
-# ----- totalSupply -----
-# Returns the total token supply.
-@public
-@constant
-def totalSupply() -> uint256:
-    return self.totalSupply
 
 
 # ----- balanceOf -----
@@ -131,7 +111,7 @@ def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
     # TODO: we need to check if msg.sender is allowed to initiate this transfer
     # TODO: is this correct?
     # assert (msg.sender == _from) or (self.approved[_from][msg.sender] == msg.sender)
-    
+
     # check if balance is sufficient
     assert self.balances[_from] >= _value
     # substract balance from sender
