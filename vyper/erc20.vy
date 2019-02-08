@@ -53,7 +53,7 @@ def symbol() -> string:
 #            other contracts MUST NOT expect these values to be present.
 @public
 @constant
-def decimals():
+def decimals() -> uint256:
 
 
 
@@ -61,7 +61,7 @@ def decimals():
 # Returns the total token supply.
 @public
 @constant
-def totalSupply():
+def totalSupply() -> uint256:
 
 
 
@@ -69,7 +69,7 @@ def totalSupply():
 # Returns the account balance of another account with address _owner.
 @public
 @constant
-def balanceOf():
+def balanceOf() -> uint256:
 
 
 
@@ -82,7 +82,7 @@ def balanceOf():
 # Transfer event.
 @public
 @constant
-def transfer():
+def transfer() -> bool:
 
 
 
