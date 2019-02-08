@@ -12,6 +12,8 @@ symbol: public(string[16]) # TODO: check if correct size
 decimals: public(uint256)
 total_supply: public(uint256)
 balances: map(address, uint256)
+# TODO: is this correct?
+approved: map(address, map(address, uint256))
 
 
 # EVENTS:
@@ -142,7 +144,11 @@ def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
 # compatibility with contracts deployed before.
 @public
 def approve(_spender: address, _value: uint256) -> bool:
-
+  # TODO: is this correct?
+  self.approved[msg.sender][_spender] = _value
+  # fire approval event
+  log.Approval({msg.sender, _spender, _value})
+  return True
 
 
 # ----- allowance -----
