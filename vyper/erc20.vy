@@ -47,6 +47,8 @@ balances: map(address, uint256)
 approved: map(address, map(address, uint256))
 
 
+# TODO: do the constructor arguments 'name' and 'symbol' need to be somehow
+#       bounded to the defined state string array size?
 @public
 def __init__(_name: string, _symbol: string, _decimals: uint256, total_supply: uint256):
     self.name = _name
