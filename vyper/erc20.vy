@@ -54,7 +54,7 @@ def __init__(_name: string, _symbol: string, _decimals: uint256, total_supply: u
 @public
 @constant
 def name() -> string:
-  return self.name
+    return self.name
 
 # ----- symbol -----
 # Returns the symbol of the token. E.g. "HIX".
@@ -63,7 +63,7 @@ def name() -> string:
 @public
 @constant
 def symbol() -> string:
-  return self.symbol
+    return self.symbol
 
 
 # ----- decimals -----
@@ -74,7 +74,7 @@ def symbol() -> string:
 @public
 @constant
 def decimals() -> uint256:
-  return self.decimals
+    return self.decimals
 
 
 # ----- totalSupply -----
@@ -82,7 +82,7 @@ def decimals() -> uint256:
 @public
 @constant
 def totalSupply() -> uint256:
-  return self.totalSupply
+    return self.totalSupply
 
 
 # ----- balanceOf -----
@@ -90,7 +90,7 @@ def totalSupply() -> uint256:
 @public
 @constant
 def balanceOf(_owner: address) -> uint256:
-  return self.balances[_owner]
+    return self.balances[_owner]
 
 
 # ----- transfer -----
@@ -103,15 +103,15 @@ def balanceOf(_owner: address) -> uint256:
 @public
 @constant
 def transfer(_to: address, _value: uint256) -> bool:
-  # check if balance is sufficient
-  assert self.balances[msg.sender] >= _value
-  # substract balance from sender
-  self.balances[msg.sender] -= _value
-  # add balance to recipient
-  self.balances[_to] += _value
-  # fire transfer event
-  log.Transfer({msg.sender, _to, _value})
-  return True
+    # check if balance is sufficient
+    assert self.balances[msg.sender] >= _value
+    # substract balance from sender
+    self.balances[msg.sender] -= _value
+    # add balance to recipient
+    self.balances[_to] += _value
+    # fire transfer event
+    log.Transfer({msg.sender, _to, _value})
+    return True
 
 
 
@@ -144,11 +144,11 @@ def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
 # compatibility with contracts deployed before.
 @public
 def approve(_spender: address, _value: uint256) -> bool:
-  # TODO: is this correct?
-  self.approved[msg.sender][_spender] = _value
-  # fire approval event
-  log.Approval({msg.sender, _spender, _value})
-  return True
+    # TODO: is this correct?
+    self.approved[msg.sender][_spender] = _value
+    # fire approval event
+    log.Approval({msg.sender, _spender, _value})
+    return True
 
 
 # ----- allowance -----
@@ -156,4 +156,4 @@ def approve(_spender: address, _value: uint256) -> bool:
 @public
 @constant
 def allowance(_owner: address, _spender: address) -> uint256:
-  return self.approved[_owner][_spender]
+    return self.approved[_owner][_spender]
