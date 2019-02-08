@@ -88,7 +88,7 @@ def totalSupply() -> uint256:
 @public
 @constant
 def balanceOf(_owner: address) -> uint256:
-  return balances[address]
+  return self.balances[_owner]
 
 
 # ----- transfer -----
@@ -100,8 +100,16 @@ def balanceOf(_owner: address) -> uint256:
 # Transfer event.
 @public
 @constant
-def transfer() -> bool:
-
+def transfer(_to: address, _value: uint256) -> bool:
+  # check if balance is sufficient
+  assert self.balances[msg.sender] >= _value
+  # substract balance from sender
+  self.balances[msg.sender] -= _value
+  # add balance to recipient
+  self.balances[_to] += _value
+  # fire transfer event
+  log.Transfer({msg.sender, _to, _value})
+  return True
 
 
 
