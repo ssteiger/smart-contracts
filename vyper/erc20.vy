@@ -11,6 +11,7 @@ name: public(string[16]) # TODO: check if correct size
 symbol: public(string[16]) # TODO: check if correct size
 decimals: public(uint256)
 total_supply: public(uint256)
+balances: map(address, uint256)
 
 
 # EVENTS:
@@ -86,8 +87,8 @@ def totalSupply() -> uint256:
 # Returns the account balance of another account with address _owner.
 @public
 @constant
-def balanceOf() -> uint256:
-
+def balanceOf(_owner: address) -> uint256:
+  return balances[address]
 
 
 # ----- transfer -----
@@ -100,6 +101,7 @@ def balanceOf() -> uint256:
 @public
 @constant
 def transfer() -> bool:
+
 
 
 
