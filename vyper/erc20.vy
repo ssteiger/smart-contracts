@@ -42,8 +42,8 @@ decimals: public(uint256)
 # Returns the total token supply.
 total_supply: public(uint256)
 
+# mappings
 balances: map(address, uint256)
-# TODO: is this correct?
 approved: map(address, map(address, uint256))
 
 
@@ -53,7 +53,8 @@ def __init__(_name: string, _symbol: string, _decimals: uint256, total_supply: u
     self.symbol = _symbol
     self.decimals = _decimals
     self.total_supply = total_supply * 10 ** _decimals
-    # TODO: decide how to mint tokens on contract creation
+    # mint all tokens to the contract creator
+    self.balances[msg.sender] = self.total_supply
     log.Transfer(ZERO_ADDRESS, msg.sender, self.total_supply)
 
 
