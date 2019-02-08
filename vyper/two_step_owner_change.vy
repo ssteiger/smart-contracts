@@ -1,4 +1,5 @@
 # Author: Sören Steiger, github.com/ssteiger
+# License: MIT
 
 # ----------------------------------------------------------
 # Two step owner change:
