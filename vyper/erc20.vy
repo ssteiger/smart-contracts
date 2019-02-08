@@ -116,8 +116,9 @@ def transfer(_to: address, _value: uint256) -> bool:
 def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
     # TODO: we need to check if msg.sender is allowed to initiate this transfer
     # TODO: is this correct?
-    # assert (msg.sender == _from) or (self.approved[_from][msg.sender] == msg.sender)
-
+    assert _from == msg.sender
+    # or self.approved[_from][msg.sender] >= _value # TODO:
+    # TODO: -> update self.approved[msg.sender][_spender] -= _value
     # check if balance is sufficient
     assert self.balances[_from] >= _value
     # substract balance from sender
