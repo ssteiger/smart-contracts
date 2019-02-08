@@ -156,3 +156,4 @@ def approve(_spender: address, _value: uint256) -> bool:
 @public
 @constant
 def allowance(_owner: address, _spender: address) -> uint256:
+  return self.approved[_owner][_spender]
