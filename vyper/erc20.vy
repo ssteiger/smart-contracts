@@ -7,6 +7,7 @@
 # TODO: implement an interface
 # -> https://vyper.readthedocs.io/en/v0.1.0-beta.8/structure-of-a-contract.html#contract-interfaces
 
+# TODO: check the use of allowances - is the logic correct?
 
 # EVENTS:
 
@@ -49,7 +50,7 @@ total_supply: public(uint256)
 
 # mappings
 balances: map(address, uint256)
-approved: map(address, map(address, uint256))
+allowances: map(address, map(address, uint256))
 
 
 # TODO: do the constructor arguments 'name' and 'symbol' need to be somehow
@@ -89,8 +90,8 @@ def balanceOf(_owner: address) -> uint256:
 # Transfer event.
 @public
 def transfer(_to: address, _value: uint256) -> bool:
-    # check if balance is sufficient
-    assert self.balances[msg.sender] >= _value
+    # NOTE: vyper does not allow unterflows
+    #       so checks for sufficient funds are done implicitly
     # substract balance from sender
     self.balances[msg.sender] -= _value
     # add balance to recipient
@@ -114,17 +115,14 @@ def transfer(_to: address, _value: uint256) -> bool:
 # Transfer event.
 @public
 def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
-    # TODO: we need to check if msg.sender is allowed to initiate this transfer
-    # TODO: is this correct?
-    assert _from == msg.sender
-    # or self.approved[_from][msg.sender] >= _value # TODO:
-    # TODO: -> update self.approved[msg.sender][_spender] -= _value
-    # check if balance is sufficient
-    assert self.balances[_from] >= _value
+    # NOTE: vyper does not allow unterflows
+    #       so checks for sufficient funds/allowances are done implicitly
     # substract balance from sender
     self.balances[_from] -= _value
     # add balance to recipient
     self.balances[_to] += _value
+    # substract balance from allowances
+    self.allowances[_from][msg.sender] -= _value
     # fire transfer event
     log.Transfer(_from, _to, _value)
     return True
@@ -143,7 +141,7 @@ def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
 @public
 def approve(_spender: address, _value: uint256) -> bool:
     # TODO: is this correct?
-    self.approved[msg.sender][_spender] = _value
+    self.allowances[msg.sender][_spender] = _value
     # fire approval event
     log.Approval(msg.sender, _spender, _value)
     return True
@@ -154,4 +152,4 @@ def approve(_spender: address, _value: uint256) -> bool:
 @public
 @constant
 def allowance(_owner: address, _spender: address) -> uint256:
-    return self.approved[_owner][_spender]
+    return self.allowances[_owner][_spender]
