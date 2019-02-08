@@ -51,7 +51,7 @@ def __init__(_name: string, _symbol: string, _decimals: uint256, total_supply: u
 @public
 @constant
 def name() -> string:
-
+  return self.name
 
 # ----- symbol -----
 # Returns the symbol of the token. E.g. "HIX".
@@ -60,7 +60,7 @@ def name() -> string:
 @public
 @constant
 def symbol() -> string:
-
+  return self.symbol
 
 
 # ----- decimals -----
@@ -71,7 +71,7 @@ def symbol() -> string:
 @public
 @constant
 def decimals() -> uint256:
-
+  return self.decimals
 
 
 # ----- totalSupply -----
@@ -79,7 +79,7 @@ def decimals() -> uint256:
 @public
 @constant
 def totalSupply() -> uint256:
-
+  return self.totalSupply
 
 
 # ----- balanceOf -----
