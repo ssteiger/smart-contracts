@@ -1,22 +1,45 @@
+# ERC777 Token Standard (https://github.com/ethereum/EIPs/issues/777)
+
 # Author: Sören Steiger, github.com/ssteiger
 # License: MIT
 
-# ERC777 Token Standard (https://github.com/ethereum/EIPs/issues/777)
 
 
 # EVENTS:
-Minted: event({operator: indexed(address), to: indexed(address), amount: uint256, data: bytes, operatorData: bytes)
-Burned: event({operator: indexed(address), to: indexed(address), amount: uint256, data: bytes, operatorData: bytes)
+# https://github.com/ethereum/EIPs/issues/777#issuecomment-461967464
+Minted: event({
+  operator: indexed(address),
+  to: indexed(address),
+  amount: uint256,
+  data: bytes[256]
+})
+
+Burned: event({
+  operator: indexed(address),
+  to: indexed(address),
+  amount: uint256,
+  data: bytes[256],
+  operatorData: bytes[256]
+})
 
 AuthorizedOperator: event({operator: indexed(address), tokenHolder: indexed(address)})
+
 RevokedOperator: event({operator: indexed(address), tokenHolder: indexed(address)})
-Sent: event({operator: indexed(address), from: indexed(address), to: indexed(address), amount: uint256, data: bytes, operatorData: bytes})
+
+Sent: event({
+  operator: indexed(address),
+  from: indexed(address),
+  to: indexed(address),
+  amount: uint256,
+  data: bytes[256],
+  operatorData: bytes[256]
+})
 
 
 
 # STATE VARIABLES:
-name: public(string[16]) # TODO: is this an acceptable size?
-symbol: public(string[16]) # TODO: is this an acceptable size?
+name: public(string[32])
+symbol: public(string[32])
 total_supply: public(uint256)
 granularity: public(uint256)
 
