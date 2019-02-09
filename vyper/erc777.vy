@@ -1,4 +1,4 @@
-# ERC777 Token Standard (https://github.com/ethereum/EIPs/issues/777)
+# ERC777 Token Standard (https://eips.ethereum.org/EIPS/eip-777)
 
 # Author: Sören Steiger, github.com/ssteiger
 # License: MIT
