@@ -5,6 +5,8 @@
 
 # NOTICE: This contract is a work-in-progress and should not be used in production!
 
+# TODO: complete implementation of 'defaultOperators'
+
 # Interface for the contract called by safeTransferFrom()
 contract ERC777TokensRecipient:
     def tokensReceived(
