@@ -50,31 +50,31 @@ defaultOperators: public(map(address, bool))
 @public
 @constant
 def defaultOperators() -> address[]:
-  
+
 
 
 @public
 def authorizeOperator(_operator: address):
-    operators[msg.sender][_operator] = True
+    self.operators[msg.sender][_operator] = True
 
 
 @public
 def revokeOperator(_operator: address):
-    operators[msg.sender][_operator] = False
+    self.operators[msg.sender][_operator] = False
 
 
 @public
 @constant
 def isOperatorFor(_operator: address, _tokenHolder: address) -> bool:
-    return operators[_tokenHolder][_operator]
+    return self.operators[_tokenHolder][_operator]
 
 
 @public
 def send(_to: address, _amount: uint256, _data: bytes[256]):
     # substract balance from sender
-    balanceOf[msg.sender] -= _amount
+    self.balanceOf[msg.sender] -= _amount
     # add balance to recipient
-    balanceOf[_to] += _amount
+    self.balanceOf[_to] += _amount
     # fire sent event
     log.Sent("", msg.sender, _to, _amount, _data, "")
 
@@ -85,9 +85,9 @@ def operatorSend(_from: address, _to: address, _amount: uint256,
     # check if msg.sender is allowed to do this
     assert operators[_from][msg.sender]
     # substract balance from sender
-    balanceOf[_from] -= _amount
+    self.balanceOf[_from] -= _amount
     # add balance to recipient
-    balanceOf[_to] += _amount
+    self.balanceOf[_to] += _amount
     # fire sent event
     log.Sent(msg.sender, _from, _to, _amount, _data, _operatorData)
 
@@ -95,9 +95,9 @@ def operatorSend(_from: address, _to: address, _amount: uint256,
 @public
 def burn(_amount: uint256):
     # substract amount from sender
-    balanceOf[msg.sender] -= _amount
+    self.balanceOf[msg.sender] -= _amount
     # burn
-    balanceOf[ZERO_ADDRESS] += _amount
+    self.balanceOf[ZERO_ADDRESS] += _amount
     # fire burned event
     log.Burned("", msg.sender, _to, _amount, _data, "")
 
@@ -105,8 +105,8 @@ def burn(_amount: uint256):
 @public
 def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]):
     # substract amount
-    balanceOf[_from] -= _amount
+    self.balanceOf[_from] -= _amount
     # burn
-    balanceOf[ZERO_ADDRESS] += _amount
+    self.balanceOf[ZERO_ADDRESS] += _amount
     # fire burned event
     log.Burned(msg.sender, _from, _to, _amount, _data, _operatorData)
