@@ -98,8 +98,17 @@ def operatorSend(_from: address, _to: address, _amount: uint256,
   log.Sent(msg.sender, _from, _to, _amount, _data, _operatorData)
 
 
-@public
-def burn(amount: uint256):
 
 @public
-def operatorBurn(from: address, amount: uint256, operatorData: bytes[256]):
+def burn(_amount: uint256):
+  balanceOf[msg.sender] -= _amount
+  balanceOf[ZERO_ADDRESS] += _amount
+  log.Burned("", msg.sender, _to, _amount, _data, "")
+
+
+
+@public
+def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]):
+  balanceOf[msg.sender] -= _amount
+  balanceOf[ZERO_ADDRESS] += _amount
+  log.Burned(msg.sender, _from, _to, _amount, _data, _operatorData)
