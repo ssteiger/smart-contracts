@@ -43,7 +43,7 @@ decimals: public(uint256)
 
 # ----- totalSupply -----
 # Returns the total token supply.
-total_supply: public(uint256)
+totalSupply: public(uint256)
 
 # mappings
 balances: map(address, uint256)
@@ -53,15 +53,15 @@ approvedFunds: map(address, map(address, uint256))
 # TODO: do the constructor arguments 'name' and 'symbol' need to be somehow
 #       bounded to the defined state string array size?
 @public
-def __init__(_name: string, _symbol: string, _decimals: uint256, total_supply: uint256):
+def __init__(_name: string, _symbol: string, _decimals: uint256, totalSupply: uint256):
     self.name = _name
     self.symbol = _symbol
     self.decimals = _decimals
-    self.total_supply = total_supply * 10 ** _decimals
+    self.totalSupply = totalSupply * 10 ** _decimals
     # mint all tokens to the contract creator
-    self.balances[msg.sender] = self.total_supply
+    self.balances[msg.sender] = self.totalSupply
     # fire transfer event
-    log.Transfer(ZERO_ADDRESS, msg.sender, self.total_supply)
+    log.Transfer(ZERO_ADDRESS, msg.sender, self.totalSupply)
 
 
 # METHODS:
