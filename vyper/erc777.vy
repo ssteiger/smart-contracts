@@ -54,13 +54,16 @@ defaultOperators: bytes[address]
 
 @public
 def __init__(_name: string, _symbol: string, _totalSupply: uint256,
-             _granularity: uint256, _defaultOperators: bytes[address]):
+             _granularity: uint256, _defaultOperators: bytes[address]=""):
     self.name = _name
     self.symbol = _symbol
     self.totalSupply = _totalSupply
     self.granularity = _granularity
     self.defaultOperators = _defaultOperators
-
+    # mint tokens
+    self.balanceOf[msg.sender] = _totalSupply
+    # fire minted event
+    log.Minted("", msg.sender, msg.sender, _totalSupply, _data, "")
 
 # METHODS:
 @public
@@ -76,6 +79,7 @@ def revokeOperator(_operator: address):
 @public
 @constant
 def isOperatorFor(_operator: address, _tokenHolder: address) -> bool:
+    # TODO: also return defaultOperators
     return self.operators[_tokenHolder][_operator]
 
 
@@ -93,6 +97,7 @@ def send(_to: address, _amount: uint256, _data: bytes[256]=""):
 def operatorSend(_from: address, _to: address, _amount: uint256,
                  _data: bytes[256]="", _operatorData: bytes[256]=""):
     # check if msg.sender is allowed to do this
+    # TODO: also check for defaultOperators
     assert operators[_from][msg.sender]
     # substract balance from sender
     self.balanceOf[_from] -= _amount
@@ -108,15 +113,18 @@ def burn(_amount: uint256):
     self.balanceOf[msg.sender] -= _amount
     # burn
     self.balanceOf[ZERO_ADDRESS] += _amount
+    # TODO: update totalSupply
     # fire burned event
     log.Burned("", msg.sender, _to, _amount, _data, "")
 
 
 @public
 def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]=""):
+    # TODO: check if is operator
     # substract amount
     self.balanceOf[_from] -= _amount
     # burn
     self.balanceOf[ZERO_ADDRESS] += _amount
+    # TODO: update totalSupply
     # fire burned event
     log.Burned(msg.sender, _from, _to, _amount, _data, _operatorData)
