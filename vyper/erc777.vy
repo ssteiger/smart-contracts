@@ -16,6 +16,17 @@ contract ERC777TokensRecipient:
         operatorData: bytes[256]
     ) -> bytes32: constant
 
+# TODO: is this actually needed?
+contract ERC777TokensSender {
+    def tokensToSend(
+        operator: address,
+        from: address,
+        to: address,
+        amount: uint256,
+        data: bytes[256],
+        operatorData: bytes[256]
+    ) -> bytes32: constant
+
 # EVENTS:
 # https://github.com/ethereum/EIPs/issues/777#issuecomment-461967464
 
@@ -62,9 +73,18 @@ granularity: public(uint256)
 
 balanceOf: map(address, uint256)
 operators: public(map(address, address))
-defaultOperators: bytes[address]
 
+# TODO: use map or use bytes array? how to check inclusion?
+defaultOperators: public(map(address))
+supportedInterfaces: public(map(bytes32, bool))
 
+# ERC165 interface ID of ERC165
+# TODO: shorten this -> constant(bytes32) = convert(1ffc9a7, bytes32)
+ERC165_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000000000000000000000001ffc9a7
+# TODO: implement this
+#ERC777_INTERFACE_ID: constant(bytes32) = bytes4(keccak256(this))
+
+# METHODS:
 @public
 def __init__(_name: string, _symbol: string, _totalSupply: uint256,
              _granularity: uint256, _defaultOperators: bytes[address]=""):
@@ -74,13 +94,24 @@ def __init__(_name: string, _symbol: string, _totalSupply: uint256,
     # MUST be greater or equal to 1
     self.granularity = _granularity
     self.defaultOperators = _defaultOperators
+    # set supported interfaces
+    self.supportedInterfaces[ERC165_INTERFACE_ID] = True
+    # TODO:
+    #self.supportedInterfaces[ERC777_INTERFACE_ID] = True
     # mint tokens
     self.balanceOf[msg.sender] = _totalSupply
     # fire minted event
     log.Minted("", msg.sender, msg.sender, _totalSupply, _data, "")
 
 
-# METHODS:
+@public
+@constant
+def supportsInterface(_interfaceID: bytes4) -> bool:
+    # Interface detection as specified in EIP165
+    # https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md
+    return self.supportedInterfaces[_interfaceID]
+
+
 @public
 def authorizeOperator(_operator: address):
     self.operators[msg.sender][_operator] = True
@@ -97,7 +128,8 @@ def isOperatorFor(_operator: address, _tokenHolder: address) -> bool:
     # TODO: also return defaultOperators
     return self.operators[_tokenHolder][_operator]
 
-# TODO: verify that is check actually works
+
+# TODO: verify that this check actually works
 # TODO: damn, that is one long function name...
 @constant
 def _checkForERC777TokensReceivedInterface(_to: address, _amount: uint256, _data: bytes[256]=""):
