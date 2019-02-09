@@ -89,7 +89,7 @@ def send(_to: address, _amount: uint256, _data: bytes[256]):
 def operatorSend(_from: address, _to: address, _amount: uint256,
                  _data: bytes[256], _operatorData: bytes[256]):
   # check if msg.sender is allowed to do this
-  assert operators[_from][msg.sender] == True
+  assert operators[_from][msg.sender]
   # substract balance from sender
   balanceOf[msg.sender] -= _amount
   # add balance to recipient
