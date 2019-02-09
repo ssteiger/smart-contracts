@@ -98,7 +98,7 @@ def operatorSend(_from: address, _to: address, _amount: uint256,
                  _data: bytes[256]="", _operatorData: bytes[256]=""):
     # check if msg.sender is opeartor for _from
     # TODO: also check for defaultOperators
-    assert operators[_from][msg.sender] or
+    assert operators[_from][msg.sender]
     # substract balance from sender
     self.balanceOf[_from] -= _amount
     # add balance to recipient
