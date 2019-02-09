@@ -3,6 +3,7 @@
 # Author: Sören Steiger, github.com/ssteiger
 # License: MIT
 
+# NOTICE: This contract is a work-in-progress and should not be used in production!
 
 # EVENTS:
 # https://github.com/ethereum/EIPs/issues/777#issuecomment-461967464
