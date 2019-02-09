@@ -52,18 +52,21 @@ balanceOf: map(address, uint256)
 operators: public(map(address, address))
 defaultOperators: bytes[address]
 
+
 @public
 def __init__(_name: string, _symbol: string, _totalSupply: uint256,
              _granularity: uint256, _defaultOperators: bytes[address]=""):
     self.name = _name
     self.symbol = _symbol
     self.totalSupply = _totalSupply
+    # MUST be greater or equal to 1
     self.granularity = _granularity
     self.defaultOperators = _defaultOperators
     # mint tokens
     self.balanceOf[msg.sender] = _totalSupply
     # fire minted event
     log.Minted("", msg.sender, msg.sender, _totalSupply, _data, "")
+
 
 # METHODS:
 @public
@@ -85,6 +88,16 @@ def isOperatorFor(_operator: address, _tokenHolder: address) -> bool:
 
 @public
 def send(_to: address, _amount: uint256, _data: bytes[256]=""):
+    """
+    TODO: Any minting, send or burning of tokens MUST be a multiple of
+          the granularity value.
+    NOTE: Any operation that would result in a balance that’s not a multiple
+          of the granularity value MUST be considered invalid, and the
+          transaction MUST revert.
+    """
+    assert _to != ZERO_ADDRESS
+    # TODO: check if recipient is a contract and implements
+    #       ER777TokenRecipient interface
     # substract balance from sender
     self.balanceOf[msg.sender] -= _amount
     # add balance to recipient
@@ -96,9 +109,12 @@ def send(_to: address, _amount: uint256, _data: bytes[256]=""):
 @public
 def operatorSend(_from: address, _to: address, _amount: uint256,
                  _data: bytes[256]="", _operatorData: bytes[256]=""):
+    assert _to != ZERO_ADDRESS
     # check if msg.sender is opeartor for _from
     # TODO: also check for defaultOperators
     assert operators[_from][msg.sender]
+    # TODO: check if recipient is a contract and implements
+    #       ER777TokenRecipient interface
     # substract balance from sender
     self.balanceOf[_from] -= _amount
     # add balance to recipient
