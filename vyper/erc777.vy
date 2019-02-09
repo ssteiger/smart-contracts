@@ -5,6 +5,17 @@
 
 # NOTICE: This contract is a work-in-progress and should not be used in production!
 
+# Interface for the contract called by safeTransferFrom()
+contract ERC777TokensRecipient:
+    def tokensReceived(
+        operator: address,
+        from: address,
+        to: address,
+        amount: uint256,
+        data: bytes[256],
+        operatorData: bytes[256]
+    ) -> bytes32: constant
+
 # EVENTS:
 # https://github.com/ethereum/EIPs/issues/777#issuecomment-461967464
 
@@ -86,6 +97,15 @@ def isOperatorFor(_operator: address, _tokenHolder: address) -> bool:
     # TODO: also return defaultOperators
     return self.operators[_tokenHolder][_operator]
 
+# TODO: verify that is check actually works
+# TODO: damn, that is one long function name...
+@constant
+def _checkForERC777TokensReceivedInterface(_to: address, _amount: uint256, _data: bytes[256]=""):
+    # check if recipient is a contract and implements the ER777TokenRecipient interface
+    # TODO: check if function paramters are correkt (next 2 lines)
+    returnValue: bytes32 = ERC777TokensRecipient(_to).tokensReceived("", msg.sender, _to, _amount, _data, "")
+    assert returnValue == method_id("tokensReceived(address,address,address,uint256,bytes,bytes)", bytes32)
+
 
 @public
 def send(_to: address, _amount: uint256, _data: bytes[256]=""):
@@ -97,8 +117,11 @@ def send(_to: address, _amount: uint256, _data: bytes[256]=""):
           transaction MUST revert.
     """
     assert _to != ZERO_ADDRESS
-    # TODO: check if recipient is a contract and implements
-    #       ER777TokenRecipient interface
+    # https://github.com/ethereum/vyper/issues/365
+    # check if `_to` is a contract address
+    if _to.is_contract:
+        self._checkForERC777TokensReceivedInterface(_to, _amount, _data)
+
     # substract balance from sender
     self.balanceOf[msg.sender] -= _amount
     # add balance to recipient
@@ -114,9 +137,10 @@ def operatorSend(_from: address, _to: address, _amount: uint256,
     # check if msg.sender is opeartor for _from
     # TODO: also check for defaultOperators
     assert operators[_from][msg.sender]
-    # TODO: check if recipient is a contract and implements
-    #       ER777TokenRecipient interface
-    # substract balance from sender
+    # check if `_to` is a contract address
+    if _to.is_contract:
+        self._checkForERC777TokensReceivedInterface(_to, _amount, _data)
+
     self.balanceOf[_from] -= _amount
     # add balance to recipient
     self.balanceOf[_to] += _amount
