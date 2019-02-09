@@ -63,6 +63,7 @@ def __init__(_name: string, _symbol: string, _decimals: uint256, total_supply: u
     self.total_supply = total_supply * 10 ** _decimals
     # mint all tokens to the contract creator
     self.balances[msg.sender] = self.total_supply
+    # fire transfer event
     log.Transfer(ZERO_ADDRESS, msg.sender, self.total_supply)
 
 
@@ -92,6 +93,7 @@ def balanceOf(_owner: address) -> uint256:
 def transfer(_to: address, _value: uint256) -> bool:
     # NOTE: vyper does not allow unterflows
     #       so checks for sufficient funds are done implicitly
+    #       see https://github.com/ethereum/vyper/issues/1237#issuecomment-461957413
     # substract balance from sender
     self.balances[msg.sender] -= _value
     # add balance to recipient
@@ -117,6 +119,7 @@ def transfer(_to: address, _value: uint256) -> bool:
 def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
     # NOTE: vyper does not allow unterflows
     #       so checks for sufficient funds/allowances are done implicitly
+    #       see https://github.com/ethereum/vyper/issues/1237#issuecomment-461957413
     # substract balance from sender
     self.balances[_from] -= _value
     # add balance to recipient
