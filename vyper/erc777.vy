@@ -38,12 +38,21 @@ Sent: event({
 # STATE VARIABLES:
 name: public(string[32])
 symbol: public(string[32])
-total_supply: public(uint256)
+totalSupply: public(uint256)
 granularity: public(uint256)
 
 balanceOf: map(address, uint256)
 operators: public(map(address, address))
 defaultOperators: bytes[address]
+
+@public
+def __init__(_name: string, _symbol: string, _totalSupply: uint256,
+             _granularity: uint256, _defaultOperators: bytes[address]):
+    self.name = _name
+    self.symbol = _symbol
+    self.totalSupply = _totalSupply
+    self.granularity = _granularity
+    self.defaultOperators = _defaultOperators
 
 
 # METHODS:
