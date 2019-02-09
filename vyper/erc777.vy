@@ -44,7 +44,8 @@ total_supply: public(uint256)
 granularity: public(uint256)
 
 balanceOf: map(address, uint256)
-# TODO: map for operators
+operators: map(address, address)
+
 
 # METHODS:
 
@@ -52,24 +53,53 @@ balanceOf: map(address, uint256)
 @constant
 def defaultOperators() -> address[]:
 
-@public
-def authorizeOperator(operator: address):
+
 
 @public
-def revokeOperator(operator: address):
+def authorizeOperator(_operator: address):
+  operators[msg.sender][_operator] = True
+
+
+
+@public
+def revokeOperator(_operator: address):
+  operators[msg.sender][_operator] = False
+
+
 
 @public
 @constant
-def isOperatorFor(operator: address, tokenHolder: address) -> bool:
+def isOperatorFor(_operator: address, _tokenHolder: address) -> bool:
+  return operators[_tokenHolder][_operator]
+
+
 
 @public
-def send(to: address, amount: uint256, data: bytes):
+def send(_to: address, _amount: uint256, _data: bytes[256]):
+  # substract balance from sender
+  balanceOf[msg.sender] -= _amount
+  # add balance to recipient
+  balanceOf[_to] += _amount
+  # fire sent event
+  log.Sent("", msg.sender, _to, _amount, _data, "")
+
+
 
 @public
-def operatorSend(from: address, to: address, amount: uint256, data: bytes, operatorData: bytes):
+def operatorSend(_from: address, _to: address, _amount: uint256,
+                 _data: bytes[256], _operatorData: bytes[256]):
+  # check if msg.sender is allowed to do this
+  assert operators[_from][msg.sender] == True
+  # substract balance from sender
+  balanceOf[msg.sender] -= _amount
+  # add balance to recipient
+  balanceOf[_to] += _amount
+  # fire sent event
+  log.Sent(msg.sender, _from, _to, _amount, _data, _operatorData)
+
 
 @public
 def burn(amount: uint256):
 
 @public
-def operatorBurn(from: address, amount: uint256, operatorData: bytes):
+def operatorBurn(from: address, amount: uint256, operatorData: bytes[256]):
