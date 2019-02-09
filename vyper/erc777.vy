@@ -6,6 +6,7 @@
 
 # EVENTS:
 # https://github.com/ethereum/EIPs/issues/777#issuecomment-461967464
+
 Minted: event({
     operator: indexed(address),
     to: indexed(address),
@@ -21,9 +22,15 @@ Burned: event({
     operatorData: bytes[256]
 })
 
-AuthorizedOperator: event({operator: indexed(address), tokenHolder: indexed(address)})
+AuthorizedOperator: event({
+    operator: indexed(address),
+    tokenHolder: indexed(address)
+})
 
-RevokedOperator: event({operator: indexed(address), tokenHolder: indexed(address)})
+RevokedOperator: event({
+    operator: indexed(address),
+    tokenHolder: indexed(address)
+})
 
 Sent: event({
     operator: indexed(address),
@@ -73,7 +80,7 @@ def isOperatorFor(_operator: address, _tokenHolder: address) -> bool:
 
 
 @public
-def send(_to: address, _amount: uint256, _data: bytes[256]):
+def send(_to: address, _amount: uint256, _data: bytes[256]=""):
     # substract balance from sender
     self.balanceOf[msg.sender] -= _amount
     # add balance to recipient
@@ -84,7 +91,7 @@ def send(_to: address, _amount: uint256, _data: bytes[256]):
 
 @public
 def operatorSend(_from: address, _to: address, _amount: uint256,
-                 _data: bytes[256], _operatorData: bytes[256]):
+                 _data: bytes[256]="", _operatorData: bytes[256]=""):
     # check if msg.sender is allowed to do this
     assert operators[_from][msg.sender]
     # substract balance from sender
@@ -106,7 +113,7 @@ def burn(_amount: uint256):
 
 
 @public
-def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]):
+def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]=""):
     # substract amount
     self.balanceOf[_from] -= _amount
     # burn
