@@ -83,7 +83,7 @@ def operatorSend(_from: address, _to: address, _amount: uint256,
     # check if msg.sender is allowed to do this
     assert operators[_from][msg.sender]
     # substract balance from sender
-    balanceOf[msg.sender] -= _amount
+    balanceOf[_from] -= _amount
     # add balance to recipient
     balanceOf[_to] += _amount
     # fire sent event
@@ -92,13 +92,19 @@ def operatorSend(_from: address, _to: address, _amount: uint256,
 
 @public
 def burn(_amount: uint256):
+    # substract amount from sender
     balanceOf[msg.sender] -= _amount
+    # burn
     balanceOf[ZERO_ADDRESS] += _amount
+    # fire burned event
     log.Burned("", msg.sender, _to, _amount, _data, "")
 
 
 @public
 def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]):
-    balanceOf[msg.sender] -= _amount
+    # substract amount
+    balanceOf[_from] -= _amount
+    # burn
     balanceOf[ZERO_ADDRESS] += _amount
+    # fire burned event
     log.Burned(msg.sender, _from, _to, _amount, _data, _operatorData)
