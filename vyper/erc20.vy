@@ -50,7 +50,7 @@ total_supply: public(uint256)
 
 # mappings
 balances: map(address, uint256)
-allowances: map(address, map(address, uint256))
+approvedFunds: map(address, map(address, uint256))
 
 
 # TODO: do the constructor arguments 'name' and 'symbol' need to be somehow
@@ -118,14 +118,14 @@ def transfer(_to: address, _value: uint256) -> bool:
 @public
 def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
     # NOTE: vyper does not allow unterflows
-    #       so checks for sufficient funds/allowances are done implicitly
+    #       so checks for sufficient funds are done implicitly
     #       see https://github.com/ethereum/vyper/issues/1237#issuecomment-461957413
-    # substract balance from sender
+    # update sender balance
     self.balances[_from] -= _value
-    # add balance to recipient
+    # update recipient balance
     self.balances[_to] += _value
-    # substract balance from allowances
-    self.allowances[_from][msg.sender] -= _value
+    # update approved funds
+    self.approvedFunds[_from][msg.sender] -= _value
     # fire transfer event
     log.Transfer(_from, _to, _value)
     return True
@@ -143,8 +143,8 @@ def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
 # compatibility with contracts deployed before.
 @public
 def approve(_spender: address, _value: uint256) -> bool:
-    # TODO: is this correct?
-    self.allowances[msg.sender][_spender] = _value
+    # overwrites the current allowance
+    self.approvedFunds[msg.sender][_spender] = _value
     # fire approval event
     log.Approval(msg.sender, _spender, _value)
     return True
@@ -155,4 +155,4 @@ def approve(_spender: address, _value: uint256) -> bool:
 @public
 @constant
 def allowance(_owner: address, _spender: address) -> uint256:
-    return self.allowances[_owner][_spender]
+    return self.approvedFunds[_owner][_spender]
