@@ -43,16 +43,10 @@ granularity: public(uint256)
 
 balanceOf: map(address, uint256)
 operators: public(map(address, address))
-defaultOperators: public(map(address, bool))
+defaultOperators: bytes[address]
 
 
 # METHODS:
-@public
-@constant
-def defaultOperators() -> address[]:
-
-
-
 @public
 def authorizeOperator(_operator: address):
     self.operators[msg.sender][_operator] = True
