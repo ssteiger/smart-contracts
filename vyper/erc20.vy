@@ -7,8 +7,6 @@
 # TODO: implement an interface
 # -> https://vyper.readthedocs.io/en/v0.1.0-beta.8/structure-of-a-contract.html#contract-interfaces
 
-# TODO: check the use of allowances - is the logic correct?
-
 # EVENTS:
 
 # ----- Transfer -----
