@@ -42,13 +42,15 @@ total_supply: public(uint256)
 granularity: public(uint256)
 
 balanceOf: map(address, uint256)
-operators: map(address, address)
+operators: public(map(address, address))
+defaultOperators: public(map(address, bool))
 
 
 # METHODS:
 @public
 @constant
 def defaultOperators() -> address[]:
+  
 
 
 @public
