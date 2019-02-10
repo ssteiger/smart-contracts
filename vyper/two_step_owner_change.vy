@@ -23,8 +23,8 @@
 
 # Type      | Unit  | Base type | Description
 # ----------------------------------------------------------
-# timestamp | 1 sec | uint256   | represents a point in time
-# timedelta | 1 sec | uint256   | is a number of seconds
+# timestamp | 1 sec | uint256   | represents a point in time
+# timedelta | 1 sec | uint256   | is a number of seconds
 # ----------------------------------------------------------
 
 # owner of this contract
