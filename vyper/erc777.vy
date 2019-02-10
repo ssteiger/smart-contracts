@@ -19,7 +19,7 @@ contract ERC777TokensRecipient:
     ) -> bytes32: constant
 
 # TODO: is this actually needed?
-contract ERC777TokensSender {
+contract ERC777TokensSender:
     def tokensToSend(
         operator: address,
         from: address,
@@ -136,7 +136,7 @@ def isOperatorFor(_operator: address, _tokenHolder: address) -> bool:
 @constant
 def _checkForERC777TokensReceivedInterface(_to: address, _amount: uint256, _data: bytes[256]=""):
     # check if recipient is a contract and implements the ER777TokenRecipient interface
-    # TODO: check if function paramters are correkt (next 2 lines)
+    # TODO: check if function paramters are correct (next 2 lines)
     returnValue: bytes32 = ERC777TokensRecipient(_to).tokensReceived("", msg.sender, _to, _amount, _data, "")
     assert returnValue == method_id("tokensReceived(address,address,address,uint256,bytes,bytes)", bytes32)
 
