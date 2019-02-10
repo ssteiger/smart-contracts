@@ -6,13 +6,16 @@
 
 # ATTENTION: This is a work in progress!!
 
+
+
 # EVENTS:
 
 # @dev This emits when ownership of any NFT changes by any mechanism.
 #      This event emits when NFTs are created (`from` == 0) and destroyed
 #      (`to` == 0). Exception: during contract creation, any number of NFTs
-#      may be created and assigned without emitting Transfer. At the time of
-#      any transfer, the approved address for that NFT (if any) is reset to none.
+#      may be created and assigned without emitting Transfer.
+#      At the time of any transfer, the approved address for that NFT (if any)
+#      is reset to none.
 Transfer: event({
     _from: indexed(address),
     _to: indexed(address),
@@ -20,8 +23,8 @@ Transfer: event({
 })
 
 
-# @dev This emits when the approved address for an NFT is changed or
-#      reaffirmed. The zero address indicates there is no approved address.
+# @dev This emits when the approved address for an NFT is changed or reaffirmed.
+#      The zero address indicates there is no approved address.
 #      When a Transfer event emits, this also indicates that the approved
 #      address for that NFT (if any) is reset to none.
 Approval: event({
@@ -32,7 +35,7 @@ Approval: event({
 
 
 # @dev This emits when an operator is enabled or disabled for an owner.
-# The operator can manage all NFTs of the owner.
+#      The operator can manage all NFTs of the owner.
 ApprovalForAll: event({
     _owner: indexed(address),
     _approved: indexed(address),
@@ -61,7 +64,6 @@ ownerOf: public(map(uint256, address))
 operatorFor: public(map(uint256, address))
 
 supportedInterfaces: public(map(bytes32, bool))
-
 # ERC165 interface ID of ERC165
 ERC165_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000000000000000000000001ffc9a7
 
@@ -108,16 +110,15 @@ def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data byte
     # When transfer is complete,
     # this function checks if `_to` is a smart contract (code size > 0)
     if _to.is_contract:
-        # If so, it calls `onERC721Received` on `_to`
-        # and throws if the return value is not
+        # If so, it calls `onERC721Received` on `_to` and throws if the return value is not
         # `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
         returnValue: bytes32 = ERC777TokensRecipient(_to).tokensReceived("", msg.sender, _to, _amount, _data, "")
         assert returnValue == method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
 
 
 # @notice Transfers the ownership of an NFT from one address to another address
-# @dev This works identically to the other function with an extra data parameter,
-# except this function just sets data to "".
+# @dev This works identically to the other function with an extra data
+#      parameter, except this function just sets data to "".
 # @param _from The current owner of the NFT
 # @param _to The new owner
 # @param _tokenId The NFT to transfer
@@ -188,19 +189,21 @@ def setApprovalForAll(_operator: address, _approved: bool):
 # @notice Get the approved address for a single NFT
 # @dev Throws if `_tokenId` is not a valid NFT.
 # @param _tokenId The NFT to find the approved address for
-# @return The approved address for this NFT, or the zero address if there is none
+# @return The approved address for this NFT, or the zero address if
+#         there is none
 # function getApproved(uint256 _tokenId) external view returns (address);
 @public
 @constant
 def getApproved(_tokenId: uint256) -> address:
-    # TODO Throws if `_tokenId` is not a valid NFT.
+    # TODO: Throws if `_tokenId` is not a valid NFT.
     return self.operatorFor[_tokenId]
 
 
 # @notice Query if an address is an authorized operator for another address
 # @param _owner The address that owns the NFTs
 # @param _operator The address that acts on behalf of the owner
-# @return True if `_operator` is an approved operator for `_owner`, false otherwise
+# @return True if `_operator` is an approved operator for `_owner`, false
+#         otherwise
 # function isApprovedForAll(address _owner, address _operator) external view returns (bool);
 @public
 @constant
