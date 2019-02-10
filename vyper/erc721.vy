@@ -4,6 +4,7 @@
 # ERC721 Token Standard
 # https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
 
+# ATTENTION: This is a work in progress!!
 
 # EVENTS:
 
@@ -57,6 +58,7 @@ balanceOf: public(map(address, uint256))
 # @return The address of the owner of the NFT
 # function ownerOf(uint256 _tokenId) external view returns (address);
 ownerOf: public(map(uint256, address))
+operatorFor: public(map(uint256, address))
 
 supportedInterfaces: public(map(bytes32, bool))
 
@@ -107,8 +109,8 @@ def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data byte
     # When transfer is complete,
     # this function checks if `_to` is a smart contract (code size > 0)
     if _to.is_contract:
-        #  If so, it calls `onERC721Received` on `_to`
-        #  and throws if the return value is not
+        # If so, it calls `onERC721Received` on `_to`
+        # and throws if the return value is not
         # `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
         returnValue: bytes32 = ERC777TokensRecipient(_to).tokensReceived("", msg.sender, _to, _amount, _data, "")
         assert returnValue == method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
@@ -168,6 +170,11 @@ def transferFrom(_from: address, _to: address, _tokenId: uint256):
 @public
 @payable
 def approve(_approved: address, _tokenId: uint256):
+		# Throws unless `msg.sender` is the current NFT owner
+		# or an authorized operator of the current owner.
+    assert _from == self.ownerOf[_tokenId] or msg.sender == self.operatorFor[_tokenId]
+		self.operator[_tokenId] = _approved
+		log.Approval(msg.sender, _approved, _tokenId)
 
 
 # @notice Enable or disable approval for a third party ("operator") to manage
@@ -187,8 +194,10 @@ def setApprovalForAll(_operator: address, _approved: bool):
 # @return The approved address for this NFT, or the zero address if there is none
 # function getApproved(uint256 _tokenId) external view returns (address);
 @public
+@constant
 def getApproved(_tokenId: uint256) -> address:
-
+		# TODO Throws if `_tokenId` is not a valid NFT.
+		return self.operatorFor[_tokenId]
 
 # @notice Query if an address is an authorized operator for another address
 # @param _owner The address that owns the NFTs
@@ -196,4 +205,5 @@ def getApproved(_tokenId: uint256) -> address:
 # @return True if `_operator` is an approved operator for `_owner`, false otherwise
 # function isApprovedForAll(address _owner, address _operator) external view returns (bool);
 @public
+@constant
 def isApprovedForAll(_owner: address, _operator: address) -> bool:
