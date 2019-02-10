@@ -88,29 +88,30 @@ def __init__():
 @public
 @payable
 def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data bytes[256]=""):
-		# Throws if `_to` is the zero address.
-		assert _to != ZERO_ADDRESS
-		# Throws if `_from` is not the current owner.
-		# TODO: check if is approved
-		# TODO: update/reset approvals
-		assert self.ownerOf[_tokenId] == _from
+    # Throws if `_to` is the zero address.
+    assert _to != ZERO_ADDRESS
+    # Throws if `_from` is not the current owner.
+    assert self.ownerOf[_tokenId] == _from
+    # TODO: check if is approved
+    # TODO: update/reset approvals
 
-		# assign token to _to
-		self.ownerOf[_tokenId] = _to
-		# updated balances
-		self.balanceOf[_from] -= 1
-		self.balanceOf[_to] += 1
-		# log transfer
-		log.Transfer(_from, _to, _tokenId)
+		# TODO: move this into its own internal function (1 out of 2)
+    # assign token to _to
+    self.ownerOf[_tokenId] = _to
+    # updated balances
+    self.balanceOf[_from] -= 1
+    self.balanceOf[_to] += 1
+    # log transfer
+    log.Transfer(_from, _to, _tokenId)
 
-		# When transfer is complete,
-		# this function checks if `_to` is a smart contract (code size > 0)
-		if _to.is_contract:
-				#  If so, it calls `onERC721Received` on `_to`
-				#  and throws if the return value is not
-				# `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
-				returnValue: bytes32 = ERC777TokensRecipient(_to).tokensReceived("", msg.sender, _to, _amount, _data, "")
-				assert returnValue == method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
+    # When transfer is complete,
+    # this function checks if `_to` is a smart contract (code size > 0)
+    if _to.is_contract:
+        #  If so, it calls `onERC721Received` on `_to`
+        #  and throws if the return value is not
+        # `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
+        returnValue: bytes32 = ERC777TokensRecipient(_to).tokensReceived("", msg.sender, _to, _amount, _data, "")
+        assert returnValue == method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
 
 
 
@@ -137,6 +138,24 @@ def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data byte
 @public
 @payable
 def transferFrom(_from: address, _to: address, _tokenId: uint256):
+    # TODO: Throws unless `msg.sender` is the current owner
+		# 			an authorized operator, or the approved address for this NFT
+
+		# Throws if `_from` is not the current owner.
+		assert self.ownerOf[_tokenId] == _from
+		# Throws if `_to` is the zero address.
+		assert _to != ZERO_ADDRESS
+		# TODO: Throws if `_tokenId` is not a valid NFT.
+
+		# TODO: move this into its own internal function (1 out of 2)
+    # assign token to _to
+    self.ownerOf[_tokenId] = _to
+    # updated balances
+    self.balanceOf[_from] -= 1
+    self.balanceOf[_to] += 1
+    # log transfer
+    log.Transfer(_from, _to, _tokenId)
+
 
 
 # @notice Change or reaffirm the approved address for an NFT
