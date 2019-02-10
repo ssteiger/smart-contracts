@@ -56,10 +56,20 @@ balanceOf: public(map(address, uint256))
 # @param _tokenId The identifier for an NFT
 # @return The address of the owner of the NFT
 # function ownerOf(uint256 _tokenId) external view returns (address);
-ownerOf: public(map(address, uint256))
+ownerOf: public(map(uint256, address))
+
+supportedInterfaces: public(map(bytes32, bool))
+
+# ERC165 interface ID of ERC165
+ERC165_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000000000000000000000001ffc9a7
+
+
 
 
 # METHODS:
+@public
+def __init__():
+    self.supportedInterfaces[ERC165_INTERFACE_ID] = True
 
 
 # @notice Transfers the ownership of an NFT from one address to another address
@@ -77,7 +87,31 @@ ownerOf: public(map(address, uint256))
 # function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes data) external payable;
 @public
 @payable
-def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, bytes[256]=""):
+def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data bytes[256]=""):
+		# Throws if `_to` is the zero address.
+		assert _to != ZERO_ADDRESS
+		# Throws if `_from` is not the current owner.
+		# TODO: check if is approved
+		# TODO: update/reset approvals
+		assert self.ownerOf[_tokenId] == _from
+
+		# assign token to _to
+		self.ownerOf[_tokenId] = _to
+		# updated balances
+		self.balanceOf[_from] -= 1
+		self.balanceOf[_to] += 1
+		# log transfer
+		log.Transfer(_from, _to, _tokenId)
+
+		# When transfer is complete,
+		# this function checks if `_to` is a smart contract (code size > 0)
+		if _to.is_contract:
+				#  If so, it calls `onERC721Received` on `_to`
+				#  and throws if the return value is not
+				# `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
+				returnValue: bytes32 = ERC777TokensRecipient(_to).tokensReceived("", msg.sender, _to, _amount, _data, "")
+				assert returnValue == method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
+
 
 
 # @notice Transfers the ownership of an NFT from one address to another address
