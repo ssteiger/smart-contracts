@@ -13,9 +13,9 @@
 # may be created and assigned without emitting Transfer. At the time of
 # any transfer, the approved address for that NFT (if any) is reset to none.
 Transfer: event({
-		_from: indexed(address),
-		_to: indexed(address),
-		_tokenId: indexed(uint256)
+    _from: indexed(address),
+    _to: indexed(address),
+    _tokenId: indexed(uint256)
 })
 
 
@@ -24,27 +24,23 @@ Transfer: event({
 # When a Transfer event emits, this also indicates that the approved
 # address for that NFT (if any) is reset to none.
 Approval: event({
-		_owner: indexed(address),
-		_approved: indexed(address),
-		_tokenId: indexed(uint256)
+    _owner: indexed(address),
+    _approved: indexed(address),
+    _tokenId: indexed(uint256)
 })
 
 
 # @dev This emits when an operator is enabled or disabled for an owner.
 # The operator can manage all NFTs of the owner.
 ApprovalForAll: event({
-		_owner: indexed(address),
-		_approved: indexed(address),
-		_approved: bool)
+    _owner: indexed(address),
+    _approved: indexed(address),
+    _approved: bool)
 })
 
 
 
 # STATE VARIABLES:
-
-
-
-# METHODS:
 
 # @notice Count all NFTs assigned to an owner
 # @dev NFTs assigned to the zero address are considered invalid, and this
@@ -52,10 +48,7 @@ ApprovalForAll: event({
 # @param _owner An address for whom to query the balance
 # @return The number of NFTs owned by `_owner`, possibly zero
 # function balanceOf(address _owner) external view returns (uint256);
-@public
-@constant
-def balanceOf(_owner: address) -> uint256:
-
+balanceOf: public(map(address, uint256))
 
 # @notice Find the owner of an NFT
 # @dev NFTs assigned to zero address are considered invalid, and queries
@@ -63,9 +56,10 @@ def balanceOf(_owner: address) -> uint256:
 # @param _tokenId The identifier for an NFT
 # @return The address of the owner of the NFT
 # function ownerOf(uint256 _tokenId) external view returns (address);
-@public
-@constant
-def ownerOf(_tokenId: uint256) -> address:
+ownerOf: public(map(address, uint256))
+
+
+# METHODS:
 
 
 # @notice Transfers the ownership of an NFT from one address to another address
