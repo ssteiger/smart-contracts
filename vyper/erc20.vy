@@ -47,7 +47,7 @@ decimals: public(uint256)
 totalSupply: public(uint256)
 
 # mappings
-balances: map(address, uint256)
+balanceOf: public(map(address, uint256))
 approvedFunds: map(address, map(address, uint256))
 
 
@@ -60,7 +60,7 @@ def __init__(_name: string, _symbol: string, _decimals: uint256, totalSupply: ui
     self.decimals = _decimals
     self.totalSupply = totalSupply * 10 ** _decimals
     # mint all tokens to the contract creator
-    self.balances[msg.sender] = self.totalSupply
+    self.balanceOf[msg.sender] = self.totalSupply
     # fire transfer event
     log.Transfer(ZERO_ADDRESS, msg.sender, self.totalSupply)
 
@@ -74,10 +74,8 @@ def __init__(_name: string, _symbol: string, _decimals: uint256, totalSupply: ui
 
 # ----- balanceOf -----
 # Returns the account balance of another account with address _owner.
-@public
-@constant
-def balanceOf(_owner: address) -> uint256:
-    return self.balances[_owner]
+# See: https://github.com/ethereum/vyper/issues/1241
+# And: https://vyper.readthedocs.io/en/v0.1.0-beta.8/types.html?highlight=getter#mappings
 
 
 # ----- transfer -----
@@ -93,9 +91,9 @@ def transfer(_to: address, _value: uint256) -> bool:
     #       so checks for sufficient funds are done implicitly
     #       see https://github.com/ethereum/vyper/issues/1237#issuecomment-461957413
     # substract balance from sender
-    self.balances[msg.sender] -= _value
+    self.balanceOf[msg.sender] -= _value
     # add balance to recipient
-    self.balances[_to] += _value
+    self.balanceOf[_to] += _value
     # fire transfer event
     log.Transfer(msg.sender, _to, _value)
     return True
@@ -119,9 +117,9 @@ def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
     #       so checks for sufficient funds are done implicitly
     #       see https://github.com/ethereum/vyper/issues/1237#issuecomment-461957413
     # update sender balance
-    self.balances[_from] -= _value
+    self.balanceOf[_from] -= _value
     # update recipient balance
-    self.balances[_to] += _value
+    self.balanceOf[_to] += _value
     # update approved funds
     self.approvedFunds[_from][msg.sender] -= _value
     # fire transfer event
