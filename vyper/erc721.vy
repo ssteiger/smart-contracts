@@ -6,7 +6,27 @@
 
 # ATTENTION: This is a work in progress!!
 
-
+# @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
+# @notice Handle the receipt of an NFT
+# @dev The ERC721 smart contract calls this function on the recipient
+#      after a `transfer`. This function MAY throw to revert and reject the
+#      transfer. Return of other than the magic value MUST result in the
+#      transaction being reverted.
+# Note: the contract address is always the message sender.
+# @param _operator The address which called `safeTransferFrom` function
+# @param _from The address which previously owned the token
+# @param _tokenId The NFT identifier which is being transferred
+# @param _data Additional data with no specified format
+# @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
+#         unless throwing
+# function onERC721Received(address _operator, address _from, uint256 _tokenId, bytes _data) external returns(bytes4);
+contract ERC721TokenReceiver:
+    def onERC721Received(
+        _operator: address,
+        _from: address,
+        _tokenId: uint256,
+        _data: bytes[256]
+    ) -> bytes32: constant
 
 # EVENTS:
 
@@ -38,8 +58,8 @@ Approval: event({
 #      The operator can manage all NFTs of the owner.
 ApprovalForAll: event({
     _owner: indexed(address),
-    _approved: indexed(address),
-    _approved: bool)
+    _operator: indexed(address),
+    _approved: bool
 })
 
 
@@ -62,6 +82,8 @@ balanceOf: public(map(address, uint256))
 # function ownerOf(uint256 _tokenId) external view returns (address);
 ownerOf: public(map(uint256, address))
 operatorFor: public(map(uint256, address))
+
+approvedForAll: public(map(address, map(address, bool)))
 
 supportedInterfaces: public(map(bytes32, bool))
 # ERC165 interface ID of ERC165
@@ -90,13 +112,13 @@ def __init__():
 # function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes data) external payable;
 @public
 @payable
-def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data bytes[256]=""):
+def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data: bytes[256]=""):
     # Throws if `_to` is the zero address.
     assert _to != ZERO_ADDRESS
     # Throws if `_from` is not the current owner.
     assert self.ownerOf[_tokenId] == _from
     # TODO: check if is approved
-    # TODO: update/reset approvals
+    assert self.operatorFor[_tokenId] == msg.sender
 
     # TODO: move this into its own internal function (1 out of 2)
     # assign token to _to
@@ -104,6 +126,8 @@ def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data byte
     # updated balances
     self.balanceOf[_from] -= 1
     self.balanceOf[_to] += 1
+    # TODO: update/reset approvals
+    self.operatorFor[_tokenId] = ZERO_ADDRESS
     # log transfer
     log.Transfer(_from, _to, _tokenId)
 
@@ -112,7 +136,7 @@ def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data byte
     if _to.is_contract:
         # If so, it calls `onERC721Received` on `_to` and throws if the return value is not
         # `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
-        returnValue: bytes32 = ERC777TokensRecipient(_to).tokensReceived("", msg.sender, _to, _amount, _data, "")
+        returnValue: bytes32 = ERC721TokenReceiver(_to).onERC721Received(_from, _to, _tokenId, _data)
         assert returnValue == method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
 
 
@@ -142,14 +166,14 @@ def transferFrom(_from: address, _to: address, _tokenId: uint256):
     # TODO: Throws unless `msg.sender` is the current owner
     #       an authorized operator, or the approved address for this NFT
 
-    # Throws if `_from` is not the current owner.
-    assert self.ownerOf[_tokenId] == _from
+    # Throws if `_from` is not the current owner, or the approved address for this NFT
+    assert (self.ownerOf[_tokenId] == _from) or (self.operatorFor[_tokenId] == _from)
     # Throws if `_to` is the zero address.
     assert _to != ZERO_ADDRESS
-    # TODO: Throws if `_tokenId` is not a valid NFT.
-
+    # Throws if `_tokenId` is not a valid NFT.
+    assert self.ownerOf[_tokenId] != ZERO_ADDRESS
     # TODO: move this into its own internal function (1 out of 2)
-    # assign token to _to
+    # assign to new owner
     self.ownerOf[_tokenId] = _to
     # updated balances
     self.balanceOf[_from] -= 1
@@ -184,6 +208,8 @@ def approve(_approved: address, _tokenId: uint256):
 # function setApprovalForAll(address _operator, bool _approved) external;
 @public
 def setApprovalForAll(_operator: address, _approved: bool):
+    self.approvedForAll[msg.sender][_operator] = _approved
+    log.ApprovalForAll(msg.sender, _operator, _approved)
 
 
 # @notice Get the approved address for a single NFT
@@ -195,7 +221,8 @@ def setApprovalForAll(_operator: address, _approved: bool):
 @public
 @constant
 def getApproved(_tokenId: uint256) -> address:
-    # TODO: Throws if `_tokenId` is not a valid NFT.
+    # Throws if `_tokenId` is not a valid NFT.
+    assert self.operatorFor[_tokenId] != ZERO_ADDRESS
     return self.operatorFor[_tokenId]
 
 
@@ -208,3 +235,4 @@ def getApproved(_tokenId: uint256) -> address:
 @public
 @constant
 def isApprovedForAll(_owner: address, _operator: address) -> bool:
+    return self.approvedForAll[_owner][_operator]
