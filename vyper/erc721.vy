@@ -28,6 +28,7 @@ contract ERC721TokenReceiver:
         _data: bytes[256]
     ) -> bytes32: constant
 
+
 # EVENTS:
 
 # @dev This emits when ownership of any NFT changes by any mechanism.
@@ -63,7 +64,6 @@ ApprovalForAll: event({
 })
 
 
-
 # STATE VARIABLES:
 
 # @notice Count all NFTs assigned to an owner
@@ -81,20 +81,43 @@ balanceOf: public(map(address, uint256))
 # @return The address of the owner of the NFT
 # function ownerOf(uint256 _tokenId) external view returns (address);
 ownerOf: public(map(uint256, address))
-operatorFor: public(map(uint256, address))
 
+operatorFor: public(map(uint256, address))
 approvedForAll: public(map(address, map(address, bool)))
 
+# TODO: check if this is the correct variable name (as defined in EIP)
 supportedInterfaces: public(map(bytes32, bool))
-# ERC165 interface ID of ERC165
+# ERC165 interface ID's
 ERC165_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000000000000000000000001ffc9a7
-
+ERC721_INTERFACE_ID: constant(bytes32) = 0x00000000000000000000000000000000000000000000000000000000150b7a02
 
 
 # METHODS:
 @public
 def __init__():
     self.supportedInterfaces[ERC165_INTERFACE_ID] = True
+    self.supportedInterfaces[ERC721_INTERFACE_ID] = True
+
+
+# TODO: shorten name
+def _checkIfIsOwnerOrOperatorOrApprovedForAll(tokenId: uint256):
+    # Throws unless `msg.sender` is
+    # the current owner
+    isOwner: bool = self.ownerOf[_tokenId] == msg.sender
+    # an authorized operator
+    isOperator: bool = self.operatorFor[_tokenId] == msg.sender
+    # or the approved address for this NFT
+    isApprovedForAll: bool = self.approvedForAll[_from][msg.sender]
+    assert (isOwner or isOperator or isApprovedForAll)
+
+
+def _setNewOwner(_currentOwner: address, _newOwner: address, _tokenId: uint256)
+    self.ownerOf[_tokenId] = _to
+    # updated balances
+    self.balanceOf[_currentOwner] -= 1
+    self.balanceOf[_newOwner] += 1
+    # TODO: update/reset approvals
+    self.operatorFor[_tokenId] = ZERO_ADDRESS
 
 
 # @notice Transfers the ownership of an NFT from one address to another address
@@ -113,24 +136,21 @@ def __init__():
 @public
 @payable
 def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data: bytes[256]=""):
-    # Throws if `_to` is the zero address.
-    assert _to != ZERO_ADDRESS
+    # Throws unless `msg.sender` is
+    # the current owner,
+    # an authorized operator,
+    # or the approved address for this NFT.
+    self._checkIfIsOwnerOrOperatorOrApprovedForAll(msg.sender)
     # Throws if `_from` is not the current owner.
     assert self.ownerOf[_tokenId] == _from
-    # TODO: check if is approved
-    assert self.operatorFor[_tokenId] == msg.sender
-
-    # TODO: move this into its own internal function (1 out of 2)
-    # assign token to _to
-    self.ownerOf[_tokenId] = _to
-    # updated balances
-    self.balanceOf[_from] -= 1
-    self.balanceOf[_to] += 1
-    # TODO: update/reset approvals
-    self.operatorFor[_tokenId] = ZERO_ADDRESS
+    # Throws if `_to` is the zero address.
+    assert _to != ZERO_ADDRESS
+    # TODO: Throws if `_tokenId` is not a valid NFT
+    assert self.ownerOf[_tokenId] != ZERO_ADDRESS
+    # update ownership
+    self._setNewOwner(_from, _to, _tokenId)
     # log transfer
     log.Transfer(_from, _to, _tokenId)
-
     # When transfer is complete,
     # this function checks if `_to` is a smart contract (code size > 0)
     if _to.is_contract:
@@ -163,21 +183,21 @@ def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data: byt
 @public
 @payable
 def transferFrom(_from: address, _to: address, _tokenId: uint256):
-    # TODO: Throws unless `msg.sender` is the current owner
-    #       an authorized operator, or the approved address for this NFT
-
-    # Throws if `_from` is not the current owner, or the approved address for this NFT
-    assert (self.ownerOf[_tokenId] == _from) or (self.operatorFor[_tokenId] == _from)
+    # Throws unless `msg.sender` is
+    # the current owner,
+    # an authorized operator,
+    # or the approved address for this NFT.
+    self._checkIfIsOwnerOrOperatorOrApprovedForAll(msg.sender)
+    # TODO: the next 10 lines are also present in `self.safeTransferFrom()`
+    #       -> put separate function?
+    # Throws if `_from` is not the current owner.
+    assert self.ownerOf[_tokenId] == _from
     # Throws if `_to` is the zero address.
     assert _to != ZERO_ADDRESS
     # Throws if `_tokenId` is not a valid NFT.
     assert self.ownerOf[_tokenId] != ZERO_ADDRESS
-    # TODO: move this into its own internal function (1 out of 2)
-    # assign to new owner
-    self.ownerOf[_tokenId] = _to
-    # updated balances
-    self.balanceOf[_from] -= 1
-    self.balanceOf[_to] += 1
+    # transfer to new owner
+    self._setNewOwner(_from, _to, _tokenId)
     # log transfer
     log.Transfer(_from, _to, _tokenId)
 
@@ -193,9 +213,13 @@ def transferFrom(_from: address, _to: address, _tokenId: uint256):
 @payable
 def approve(_approved: address, _tokenId: uint256):
     # Throws unless `msg.sender` is the current NFT owner
+    isOwner: bool = self.ownerOf[_tokenId] == msg.sender
     # or an authorized operator of the current owner.
-    assert _from == self.ownerOf[_tokenId] or msg.sender == self.operatorFor[_tokenId]
-    self.operator[_tokenId] = _approved
+    isOperator: bool = self.operatorFor[_tokenId] == msg.sender
+    # TODO: does the this include approvedForAll?
+    assert (isOwner or isOperator)
+    # set new approved address
+    self.operatorFor[_tokenId] = _approved
     log.Approval(msg.sender, _approved, _tokenId)
 
 
@@ -208,6 +232,7 @@ def approve(_approved: address, _tokenId: uint256):
 # function setApprovalForAll(address _operator, bool _approved) external;
 @public
 def setApprovalForAll(_operator: address, _approved: bool):
+    # TODO: The contract MUST allow multiple operators per owner.
     self.approvedForAll[msg.sender][_operator] = _approved
     log.ApprovalForAll(msg.sender, _operator, _approved)
 
