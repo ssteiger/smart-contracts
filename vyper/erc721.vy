@@ -85,8 +85,11 @@ ownerOf: public(map(uint256, address))
 operatorFor: public(map(uint256, address))
 approvedForAll: public(map(address, map(address, bool)))
 
-# TODO: check if this is the correct variable name (as defined in EIP)
-supportedInterfaces: public(map(bytes32, bool))
+# Interface detection as specified in ERC165
+# https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md
+# TODO: check if this is the correct variable name (as defined in ERC165)
+# TODO: verify that this works
+supportsInterface: public(map(bytes32, bool))
 # ERC165 interface ID's
 ERC165_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000000000000000000000001ffc9a7
 ERC721_INTERFACE_ID: constant(bytes32) = 0x00000000000000000000000000000000000000000000000000000000150b7a02
@@ -95,6 +98,7 @@ ERC721_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000
 # METHODS:
 @public
 def __init__():
+    # set supported interfaces
     self.supportedInterfaces[ERC165_INTERFACE_ID] = True
     self.supportedInterfaces[ERC721_INTERFACE_ID] = True
 
