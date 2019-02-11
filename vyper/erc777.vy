@@ -108,8 +108,8 @@ def __init__(_name: string, _symbol: string, _totalSupply: uint256,
 
 @public
 @constant
-def supportsInterface(_interfaceID: bytes4) -> bool:
-    # Interface detection as specified in EIP165
+def supportsInterface(_interfaceID: bytes32) -> bool:
+    # Interface detection as specified in ERC165
     # https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md
     return self.supportedInterfaces[_interfaceID]
 
