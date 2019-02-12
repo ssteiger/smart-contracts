@@ -135,6 +135,8 @@ def _transfer(_from: address, _to: address, _tokenId: uint256):
 # @param _owner An address for whom to query the balance
 # @return The number of NFTs owned by `_owner`, possibly zero
 # function balanceOf(address _owner) external view returns (uint256);
+@public
+@constant
 def balanceOf(_owner: address) -> uint256:
     # NFTs assigned to the zero address are considered invalid, and this
     # function throws for queries about the zero address.
@@ -148,6 +150,8 @@ def balanceOf(_owner: address) -> uint256:
 # @param _tokenId The identifier for an NFT
 # @return The address of the owner of the NFT
 # function ownerOf(uint256 _tokenId) external view returns (address);
+@public
+@constant
 def ownerOf(_owner: uint256) -> address:
     # NFTs assigned to the zero address are considered invalid, and this
     # function throws for queries about the zero address.
