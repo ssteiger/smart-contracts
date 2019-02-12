@@ -66,20 +66,7 @@ ApprovalForAll: event({
 
 # STATE VARIABLES:
 
-# @notice Count all NFTs assigned to an owner
-# @dev NFTs assigned to the zero address are considered invalid, and this
-#      function throws for queries about the zero address.
-# @param _owner An address for whom to query the balance
-# @return The number of NFTs owned by `_owner`, possibly zero
-# function balanceOf(address _owner) external view returns (uint256);
 balanceOf: public(map(address, uint256))
-
-# @notice Find the owner of an NFT
-# @dev NFTs assigned to zero address are considered invalid, and queries
-#      about them do throw.
-# @param _tokenId The identifier for an NFT
-# @return The address of the owner of the NFT
-# function ownerOf(uint256 _tokenId) external view returns (address);
 ownerOf: public(map(uint256, address))
 
 operatorFor: public(map(uint256, address))
@@ -115,13 +102,40 @@ def _checkIfIsOwnerOrOperatorOrApprovedForAll(tokenId: uint256):
     assert (isOwner or isOperator or isApprovedForAll)
 
 
-def _setNewOwner(_currentOwner: address, _newOwner: address, _tokenId: uint256)
+def _setNewOwner(_currentOwner: address, _newOwner: address, _tokenId: uint256):
     self.ownerOf[_tokenId] = _to
     # updated balances
     self.balanceOf[_currentOwner] -= 1
     self.balanceOf[_newOwner] += 1
-    # TODO: update/reset approvals
+    # reset operator
     self.operatorFor[_tokenId] = ZERO_ADDRESS
+
+
+# @notice Count all NFTs assigned to an owner
+# @dev NFTs assigned to the zero address are considered invalid, and this
+#      function throws for queries about the zero address.
+# @param _owner An address for whom to query the balance
+# @return The number of NFTs owned by `_owner`, possibly zero
+# function balanceOf(address _owner) external view returns (uint256);
+def balanceOf(_owner: address) -> uint256:
+    # NFTs assigned to the zero address are considered invalid, and this
+    # function throws for queries about the zero address.
+    assert _owner != ZERO_ADDRESS
+    return self.balanceOf[address]
+
+
+# @notice Find the owner of an NFT
+# @dev NFTs assigned to zero address are considered invalid, and queries
+#      about them do throw.
+# @param _tokenId The identifier for an NFT
+# @return The address of the owner of the NFT
+# function ownerOf(uint256 _tokenId) external view returns (address);
+def ownerOf(_owner: uint256) -> address:
+    # NFTs assigned to the zero address are considered invalid, and this
+    # function throws for queries about the zero address.
+    owner: address = self.ownerOf[uint256]
+    assert owner != ZERO_ADDRESS
+    return owner
 
 
 # @notice Transfers the ownership of an NFT from one address to another address
@@ -251,7 +265,7 @@ def setApprovalForAll(_operator: address, _approved: bool):
 @constant
 def getApproved(_tokenId: uint256) -> address:
     # Throws if `_tokenId` is not a valid NFT.
-    assert self.operatorFor[_tokenId] != ZERO_ADDRESS
+    assert self.ownerOf[_tokenId] != ZERO_ADDRESS
     return self.operatorFor[_tokenId]
 
 
