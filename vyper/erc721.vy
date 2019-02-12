@@ -74,9 +74,7 @@ approvedForAll: public(map(address, map(address, bool)))
 
 # Interface detection as specified in ERC165
 # https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md
-# TODO: check if this is the correct variable name (as defined in ERC165)
-# TODO: verify that this works
-supportsInterface: public(map(bytes32, bool))
+supportedInterfaces: public(map(bytes32, bool))
 # ERC165 interface ID's
 ERC165_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000000000000000000000001ffc9a7
 ERC721_INTERFACE_ID: constant(bytes32) = 0x00000000000000000000000000000000000000000000000000000000150b7a02
@@ -130,6 +128,14 @@ def _transfer(_from: address, _to: address, _tokenId: uint256):
     self._setNewOwner(_from, _to, _tokenId)
     # log transfer
     log.Transfer(_from, _to, _tokenId)
+
+
+@public
+@constant
+def supportsInterface(_interfaceID: bytes32) -> bool:
+    # Interface detection as specified in ERC165
+    # https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md
+    return self.supportedInterfaces[_interfaceID]
 
 
 # @notice Count all NFTs assigned to an owner
