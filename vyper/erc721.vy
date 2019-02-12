@@ -91,6 +91,7 @@ def __init__():
 
 
 # TODO: shorten name
+@private
 def _checkIfIsOwnerOrOperatorOrApprovedForAll(tokenId: uint256):
     # Throws unless `msg.sender` is
     # the current owner
@@ -102,6 +103,7 @@ def _checkIfIsOwnerOrOperatorOrApprovedForAll(tokenId: uint256):
     assert (isOwner or isOperator or isApprovedForAll)
 
 
+@private
 def _setNewOwner(_currentOwner: address, _newOwner: address, _tokenId: uint256):
     self.ownerOfNFT[_tokenId] = _to
     # updated balances
@@ -111,6 +113,7 @@ def _setNewOwner(_currentOwner: address, _newOwner: address, _tokenId: uint256):
     self.operatorFor[_tokenId] = ZERO_ADDRESS
 
 
+@private
 def _transfer(_from: address, _to: address, _tokenId: uint256):
     # Throws unless `msg.sender` is
     # the current owner,
