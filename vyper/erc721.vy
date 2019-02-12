@@ -90,20 +90,20 @@ def __init__():
 
 # TODO: shorten name
 @private
-def _checkIfIsOwnerOrOperatorOrApprovedForAll(tokenId: uint256):
+def _checkIfIsOwnerOrOperatorOrApprovedForAll(_msgSender: address, _from: address, _tokenId: uint256):
     # Throws unless `msg.sender` is
     # the current owner
-    isOwner: bool = self.ownerOfNFT[_tokenId] == msg.sender
+    isOwner: bool = self.ownerOfNFT[_tokenId] == _msgSender
     # an authorized operator
-    isOperator: bool = self.operatorFor[_tokenId] == msg.sender
+    isOperator: bool = self.operatorFor[_tokenId] == _msgSender
     # or the approved address for this NFT
-    isApprovedForAll: bool = self.approvedForAll[_from][msg.sender]
+    isApprovedForAll: bool = self.approvedForAll[_from][_msgSender]
     assert (isOwner or isOperator or isApprovedForAll)
 
 
 @private
 def _setNewOwner(_currentOwner: address, _newOwner: address, _tokenId: uint256):
-    self.ownerOfNFT[_tokenId] = _to
+    self.ownerOfNFT[_tokenId] = _newOwner
     # updated balances
     self.nftCount[_currentOwner] -= 1
     self.nftCount[_newOwner] += 1
@@ -113,11 +113,6 @@ def _setNewOwner(_currentOwner: address, _newOwner: address, _tokenId: uint256):
 
 @private
 def _transfer(_from: address, _to: address, _tokenId: uint256):
-    # Throws unless `msg.sender` is
-    # the current owner,
-    # an authorized operator,
-    # or the approved address for this NFT.
-    self._checkIfIsOwnerOrOperatorOrApprovedForAll(msg.sender)
     # Throws if `_from` is not the current owner.
     assert self.ownerOfNFT[_tokenId] == _from
     # Throws if `_to` is the zero address.
@@ -150,7 +145,7 @@ def balanceOf(_owner: address) -> uint256:
     # NFTs assigned to the zero address are considered invalid, and this
     # function throws for queries about the zero address.
     assert _owner != ZERO_ADDRESS
-    return self.nftCount[address]
+    return self.nftCount[_owner]
 
 
 # @notice Find the owner of an NFT
@@ -164,7 +159,7 @@ def balanceOf(_owner: address) -> uint256:
 def ownerOf(_owner: uint256) -> address:
     # NFTs assigned to the zero address are considered invalid, and this
     # function throws for queries about the zero address.
-    owner: address = self.ownerOfNFT[uint256]
+    owner: address = self.ownerOfNFT[_owner]
     assert owner != ZERO_ADDRESS
     return owner
 
@@ -185,6 +180,12 @@ def ownerOf(_owner: uint256) -> address:
 @public
 @payable
 def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data: bytes[256]=""):
+    # Throws unless `msg.sender` is
+    # the current owner,
+    # an authorized operator,
+    # or the approved address for this NFT.
+    self._checkIfIsOwnerOrOperatorOrApprovedForAll(msg.sender, _from, _tokenId)
+    # transfer
     self._transfer(_from, _to, _tokenId)
     # When transfer is complete,
     # this function checks if `_to` is a smart contract (code size > 0)
@@ -218,6 +219,12 @@ def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data: byt
 @public
 @payable
 def transferFrom(_from: address, _to: address, _tokenId: uint256):
+    # Throws unless `msg.sender` is
+    # the current owner,
+    # an authorized operator,
+    # or the approved address for this NFT.
+    self._checkIfIsOwnerOrOperatorOrApprovedForAll(msg.sender, _from, _tokenId)
+    # transfer
     self._transfer(_from, _to, _tokenId)
 
 
