@@ -39,7 +39,7 @@ durationInBlocks: public(uint256)
 nftSoldCount: public(uint256)
 nftClaimedCount: public(uint256)
 
-# allowes backers to reclaim their ether if
+# allows backers to reclaim their ether if
 # ico is closed and funding goal was not reached
 weiBalanceOf: map(address, wei_value)
 claimableNftBalanceOf: map(address, uint256)

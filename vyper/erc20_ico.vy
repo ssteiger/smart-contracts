@@ -37,7 +37,7 @@ durationInBlocks: public(uint256)
 
 fundingGoalReached: public(bool)
 
-# allowes backers to reclaim their ether if ico
+# allows backers to reclaim their ether if ico
 # is closed and fundingGoalReached is not reached
 balanceOf: map(address, wei_value)
 
