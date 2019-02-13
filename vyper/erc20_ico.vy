@@ -4,7 +4,7 @@
 # ICO for an ERC20 Token
 # https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
 
-# NOTICE: This contract has not been tested and should not be
+# WARNING: This contract has not been tested and should not be
 #         used in production!
 
 # TODO: Check that the ZERO_ADDRESS is the correct 'from' address
@@ -82,11 +82,11 @@ def __default__():
         # add correct value to backers balance
         self.balanceOf[msg.sender] += (msg.value - surplus)
         log.FundingReceived(msg.sender, msg.value - surplus)
-        # mark ICO successfully completed
+        # mark ICO as successfully completed
         self.fundingGoalReached = True
         # fire token goal reached event
         log.GoalReached(self.fundingGoal)
-        # TODO: return surplus to backer
+        # return surplus to backer
         send(msg.sender, surplus)
     else:
         # add value to backers balance
