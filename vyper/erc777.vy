@@ -31,7 +31,6 @@ contract ERC777TokensSender:
 
 # EVENTS:
 # https://github.com/ethereum/EIPs/issues/777#issuecomment-461967464
-
 Minted: event({
     _operator: indexed(address),
     _to: indexed(address),
@@ -132,8 +131,15 @@ def isOperatorFor(_operator: address, _tokenHolder: address) -> bool:
 
 
 # TODO: verify that this check actually works
+@private
 @constant
-def _checkForERC777RecipientInterface(_operator: address, _from: address, _to: address, _amount: uint256, _data: bytes[256]="", _operatorData: bytes[256]=""):
+def _checkForERC777RecipientInterface(_operator: address,
+                                      _from: address,
+                                      _to: address,
+                                      _amount: uint256,
+                                      _data: bytes[256]="",
+                                      _operatorData: bytes[256]=""
+                                    ):
     # check if recipient is a contract and implements the ER777TokenRecipient interface
     # TODO: check if function paramters are correct (next 2 lines)
     returnValue: bytes32 = ERC777TokensRecipient(_to).tokensReceived(_operator, _from, _to, _amount, _data, _operatorData)
@@ -142,12 +148,10 @@ def _checkForERC777RecipientInterface(_operator: address, _from: address, _to: a
 
 @public
 def send(_to: address, _amount: uint256, _data: bytes[256]=""):
-    # TODO: Any minting, send or burning of tokens MUST be a multiple of
-    #       the granularity value.
-    # NOTE: Any operation that would result in a balance that’s not a multiple
-    #       of the granularity value MUST be considered invalid, and the
-    #       transaction MUST revert.
     assert _to != ZERO_ADDRESS
+    # Any minting, send or burning of tokens MUST be a multiple of
+    # the granularity value.
+    assert _amount % self.granularity == 0
     # https://github.com/ethereum/vyper/issues/365
     # check if `_to` is a contract address
     if _to.is_contract:
@@ -162,7 +166,12 @@ def send(_to: address, _amount: uint256, _data: bytes[256]=""):
 
 
 @public
-def operatorSend(_from: address, _to: address, _amount: uint256, _data: bytes[256]="", _operatorData: bytes[256]=""):
+def operatorSend(_from: address,
+                 _to: address,
+                 _amount: uint256,
+                 _data: bytes[256]="",
+                 _operatorData: bytes[256]=""
+               ):
     assert _to != ZERO_ADDRESS
     # check if msg.sender is opeartor for _from
     # TODO: also check for defaultOperators
@@ -180,6 +189,9 @@ def operatorSend(_from: address, _to: address, _amount: uint256, _data: bytes[25
 
 @public
 def burn(_amount: uint256):
+    # Any minting, send or burning of tokens MUST be a multiple of
+    # the granularity value.
+    assert _amount % self.granularity == 0
     # substract amount from sender
     self.balanceOf[msg.sender] -= _amount
     # burn
@@ -195,7 +207,7 @@ def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]="")
     # check if msg.sender is opeartor for _from
     # TODO: also check for defaultOperators
     assert operators[_from][msg.sender]
-    # substract amount
+    # remove from balance
     self.balanceOf[_from] -= _amount
     # burn
     self.balanceOf[ZERO_ADDRESS] += _amount
