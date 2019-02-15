@@ -44,7 +44,6 @@ Burned: event({
     _operator: indexed(address),
     _from: indexed(address),
     _amount: uint256,
-    _data: bytes[256],
     _operatorData: bytes[256]
 })
 
@@ -213,7 +212,10 @@ def burn(_amount: uint256):
     # update totalSupply
     self.totalSupply -= _amount
     # fire burned event
-    log.Burned("", msg.sender, _amount, _data, "")
+    # NOTE: quoting @0xjac:
+    #       In `Sent`, the `userData` is intended for the recipient not the sender.
+    #       With `Burned` there is no recipient so the `userData` would be intended to no one.
+    log.Burned(msg.sender, msg.sender, _amount, "")
 
 
 @public
