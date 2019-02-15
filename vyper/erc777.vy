@@ -41,7 +41,6 @@ Minted: event({
 
 Burned: event({
     _operator: indexed(address),
-    _to: indexed(address),
     _amount: uint256,
     _data: bytes[256],
     _operatorData: bytes[256]
@@ -74,10 +73,11 @@ totalSupply: public(uint256)
 granularity: public(uint256)
 
 balanceOf: map(address, uint256)
+# The token MAY define default operators.
+# A default operator is an implicitly authorized operator for all token holders.
+defaultOperators: public(map(address, bool))
 operators: public(map(address, address))
 
-# TODO: use map or use bytes array? how to check inclusion?
-defaultOperators: public(map(address, address))
 supportedInterfaces: public(map(bytes32, bool))
 
 # ERC165 interface ID of ERC165
@@ -100,6 +100,8 @@ def __init__(_name: string,
     self.totalSupply = _totalSupply
     # MUST be greater or equal to 1
     self.granularity = _granularity
+    # The token MUST define default operators at creation time
+    # The token contract MUST NOT add or remove default operators ever
     self.defaultOperators = _defaultOperators
     # set supported interfaces
     self.supportedInterfaces[ERC165_INTERFACE_ID] = True
@@ -183,8 +185,9 @@ def operatorSend(_from: address,
     # the granularity value.
     assert _amount % self.granularity == 0
     # check if msg.sender is operator for _from
-    # TODO: also check for defaultOperators
-    assert operators[_from][msg.sender]
+    isDefaultOperator: bool = self.defaultOperators[_from]
+    isOperator: bool = self.operators[_from][msg.sender]
+    assert (isDefaultOperator or isOperator)
     # check if `_to` is a contract address
     if _to.is_contract:
         self._checkForERC777RecipientInterface(msg.sender, _from, _to, _amount, _data, _operatorData)
@@ -214,8 +217,9 @@ def burn(_amount: uint256):
 @public
 def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]=""):
     # check if msg.sender is operator for _from
-    # TODO: also check for defaultOperators
-    assert operators[_from][msg.sender]
+    isDefaultOperator: bool = self.defaultOperators[_from]
+    isOperator: bool = self.operators[_from][msg.sender]
+    assert (isDefaultOperator or isOperator)
     # remove from balance
     self.balanceOf[_from] -= _amount
     # burn
