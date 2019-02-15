@@ -206,7 +206,7 @@ def burn(_amount: uint256):
     # Any minting, send or burning of tokens MUST be a multiple of
     # the granularity value.
     assert _amount % self.granularity == 0
-    # substract amount from sender
+    # remove amount from sender
     self.balanceOf[msg.sender] -= _amount
     # burn
     self.balanceOf[ZERO_ADDRESS] += _amount
@@ -222,6 +222,9 @@ def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]="")
     isDefaultOperator: bool = self.defaultOperators[_from]
     isOperator: bool = self.operators[_from][msg.sender]
     assert (isDefaultOperator or isOperator)
+    # Any minting, send or burning of tokens MUST be a multiple of
+    # the granularity value.
+    assert _amount % self.granularity == 0
     # remove from balance
     self.balanceOf[_from] -= _amount
     # burn
