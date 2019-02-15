@@ -213,7 +213,7 @@ def burn(_amount: uint256):
     # update totalSupply
     self.totalSupply -= _amount
     # fire burned event
-    log.Burned("", msg.sender, _to, _amount, _data, "")
+    log.Burned("", msg.sender, _amount, _data, "")
 
 
 @public
@@ -229,4 +229,4 @@ def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]="")
     # update totalSupply
     self.totalSupply -= _amount
     # fire burned event
-    log.Burned(msg.sender, _from, _to, _amount, _data, _operatorData)
+    log.Burned(msg.sender, _from, _amount, "", _operatorData)
