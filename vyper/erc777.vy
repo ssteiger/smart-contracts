@@ -39,8 +39,10 @@ Minted: event({
     _data: bytes[256]
 })
 
+# TODO: https://github.com/ethereum/EIPs/issues/777#issuecomment-461967464
 Burned: event({
     _operator: indexed(address),
+    _from: indexed(address),
     _amount: uint256,
     _data: bytes[256],
     _operatorData: bytes[256]
