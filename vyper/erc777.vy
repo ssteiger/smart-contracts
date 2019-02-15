@@ -8,8 +8,8 @@
 # TODO: complete implementation of 'defaultOperators'
 
 # Interface for the contract called by safeTransferFrom()
-contract ERC777TokensRecipient:
-    def tokensReceived(
+contract ERC777TokensSender:
+    def tokensToSend(
         _operator: address,
         _from: address,
         _to: address,
@@ -18,9 +18,8 @@ contract ERC777TokensRecipient:
         _operatorData: bytes[256]
     ) -> bytes32: constant
 
-# TODO: is this actually needed?
-contract ERC777TokensSender:
-    def tokensToSend(
+contract ERC777TokensRecipient:
+    def tokensReceived(
         _operator: address,
         _from: address,
         _to: address,
@@ -114,6 +113,11 @@ def __init__(_name: string,
     log.Minted(msg.sender, msg.sender, _totalSupply, _data)
 
 
+# NOTE: vyper automatically generates a 'defaultOperators()' getter
+#       method because `defaultOperators` is declared as public
+# def defaultOperators()
+
+
 @public
 @constant
 def supportsInterface(_interfaceID: bytes32) -> bool:
@@ -123,6 +127,7 @@ def supportsInterface(_interfaceID: bytes32) -> bool:
 
 
 @public
+# TODO: A token holder MAY have multiple operators at the same time
 def authorizeOperator(_operator: address):
     self.operators[msg.sender][_operator] = True
 
@@ -135,21 +140,43 @@ def revokeOperator(_operator: address):
 @public
 @constant
 def isOperatorFor(_operator: address, _tokenHolder: address) -> bool:
+    # NOTE: An address MUST always be an operator for itself
     # TODO: also return defaultOperators
-    return self.operators[_tokenHolder][_operator]
+    isSelf: bool = _operator == _tokenHolder
+    isDefaultOperator: bool = self.defaultOperators[_operator]
+    isOperator: bool = self.operators[_tokenHolder][_operator]
+
+    isOperatorFor: bool = (isSelf or isDefaultOperator or isOperator)
+    return isOperatorFor
 
 
 # TODO: verify that this check actually works
 @private
 @constant
-def _checkForERC777RecipientInterface(_operator: address,
-                                      _from: address,
-                                      _to: address,
-                                      _amount: uint256,
-                                      _data: bytes[256]="",
-                                      _operatorData: bytes[256]=""
-                                    ):
-    # check if recipient is a contract and implements the ER777TokenRecipient interface
+def _checkForERC777TokensInterface_Sender(_operator: address,
+                                          _from: address,
+                                          _to: address,
+                                          _amount: uint256,
+                                          _data: bytes[256]="",
+                                          _operatorData: bytes[256]=""
+                                         ):
+    # check if token holder registers an `ERC777TokensSender` implementation via ERC820
+    # TODO: check if function paramters are correct (next 2 lines)
+    returnValue: bytes32 = ERC777TokensSender(_from).tokensToSend(_operator, _from, _to, _amount, _data, _operatorData)
+    assert returnValue == method_id("tokensToSend(address,address,address,uint256,bytes,bytes)", bytes32)
+
+
+# TODO: verify that this check actually works
+@private
+@constant
+def _checkForERC777TokensInterface_Recipient(_operator: address,
+                                             _from: address,
+                                             _to: address,
+                                             _amount: uint256,
+                                             _data: bytes[256]="",
+                                             _operatorData: bytes[256]=""
+                                            ):
+    # check if recipient implements the `ER777TokenRecipient` interface
     # TODO: check if function paramters are correct (next 2 lines)
     returnValue: bytes32 = ERC777TokensRecipient(_to).tokensReceived(_operator, _from, _to, _amount, _data, _operatorData)
     assert returnValue == method_id("tokensReceived(address,address,address,uint256,bytes,bytes)", bytes32)
@@ -161,15 +188,27 @@ def send(_to: address, _amount: uint256, _data: bytes[256]=""):
     # Any minting, send or burning of tokens MUST be a multiple of
     # the granularity value.
     assert _amount % self.granularity == 0
-    # https://github.com/ethereum/vyper/issues/365
+    # check if `msg.sender` is a contract address
+    if msg.sender.is_contract:
+        self._checkForERC777TokensInterface_Sender("", msg.sender, _to, _amount, _data, "")
+        # TODO: call tokensToSend hook
+
     # check if `_to` is a contract address
     if _to.is_contract:
-        self._checkForERC777RecipientInterface("", msg.sender, _to, _amount, _data, "")
+        self._checkForERC777TokensInterface_Recipient("", msg.sender, _to, _amount, _data, "")
+        # TODO: call tokensReceived hook
 
     # substract balance from sender
     self.balanceOf[msg.sender] -= _amount
     # add balance to recipient
     self.balanceOf[_to] += _amount
+    # TODO:
+    # The token contract MUST call the `tokensToSend` hook of the token holder
+    # if the token holder registers an `ERC777TokensSender` implementation via ERC820
+    # TODO:
+    # The token contract MUST call the `tokensReceived` hook of the recipient
+    # if the recipient registers an `ERC777TokensRecipient` implementation via ERC820
+
     # fire sent event
     log.Sent("", msg.sender, _to, _amount, _data, "")
 
@@ -191,7 +230,7 @@ def operatorSend(_from: address,
     assert (isDefaultOperator or isOperator)
     # check if `_to` is a contract address
     if _to.is_contract:
-        self._checkForERC777RecipientInterface(msg.sender, _from, _to, _amount, _data, _operatorData)
+        self._checkForERC777TokensInterface_Recipient(msg.sender, _from, _to, _amount, _data, _operatorData)
 
     self.balanceOf[_from] -= _amount
     # add balance to recipient
@@ -220,10 +259,13 @@ def burn(_amount: uint256):
 
 @public
 def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]=""):
+    # NOTE: The operator MAY pass information
     # check if msg.sender is operator for _from
+    # NOTE: An address MUST always be an operator for itself
+    isSelf: bool = msg.sender == _from
     isDefaultOperator: bool = self.defaultOperators[_from]
     isOperator: bool = self.operators[_from][msg.sender]
-    assert (isDefaultOperator or isOperator)
+    assert (isSelf or isDefaultOperator or isOperator)
     # Any minting, send or burning of tokens MUST be a multiple of
     # the granularity value.
     assert _amount % self.granularity == 0
