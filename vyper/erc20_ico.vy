@@ -47,8 +47,11 @@ ZERO_WEI: constant(wei_value) = as_wei_value(0, 'wei')
 
 
 @public
-def __init__(_erc20TokenContract: address, _fundingGoalInEther: uint256,
-             _openAtBlock: uint256, _durationInBlocks: uint256):
+def __init__(_erc20TokenContract: address,
+             _fundingGoalInEther: uint256,
+             _openAtBlock: uint256,
+             _durationInBlocks: uint256
+           ):
     self.contractOperator = msg.sender
     self.erc20TokenContract = _erc20TokenContract
 

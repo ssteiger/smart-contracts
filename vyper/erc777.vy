@@ -29,6 +29,7 @@ contract ERC777TokensSender:
         _operatorData: bytes[256]
     ) -> bytes32: constant
 
+
 # EVENTS:
 # https://github.com/ethereum/EIPs/issues/777#issuecomment-461967464
 Minted: event({
@@ -85,10 +86,15 @@ ERC165_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000
 # TODO: implement this
 #ERC777_INTERFACE_ID: constant(bytes32) = bytes4(keccak256(this))
 
+
 # METHODS:
 @public
-def __init__(_name: string, _symbol: string, _totalSupply: uint256,
-             _granularity: uint256, _defaultOperators: bytes[address]=""):
+def __init__(_name: string,
+             _symbol: string,
+             _totalSupply: uint256,
+             _granularity: uint256,
+             _defaultOperators: bytes[address]=""
+           ):
     self.name = _name
     self.symbol = _symbol
     self.totalSupply = _totalSupply
@@ -173,7 +179,7 @@ def operatorSend(_from: address,
                  _operatorData: bytes[256]=""
                ):
     assert _to != ZERO_ADDRESS
-    # check if msg.sender is opeartor for _from
+    # check if msg.sender is operator for _from
     # TODO: also check for defaultOperators
     assert operators[_from][msg.sender]
     # check if `_to` is a contract address
@@ -204,7 +210,7 @@ def burn(_amount: uint256):
 
 @public
 def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]=""):
-    # check if msg.sender is opeartor for _from
+    # check if msg.sender is operator for _from
     # TODO: also check for defaultOperators
     assert operators[_from][msg.sender]
     # remove from balance
