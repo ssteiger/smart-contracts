@@ -108,7 +108,7 @@ def __init__(_name: string,
     # mint tokens
     self.balanceOf[msg.sender] = _totalSupply
     # fire minted event
-    log.Minted("", msg.sender, msg.sender, _totalSupply, _data, "")
+    log.Minted(msg.sender, msg.sender, _totalSupply, _data)
 
 
 @public
