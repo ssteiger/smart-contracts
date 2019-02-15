@@ -179,6 +179,9 @@ def operatorSend(_from: address,
                  _operatorData: bytes[256]=""
                ):
     assert _to != ZERO_ADDRESS
+    # Any minting, send or burning of tokens MUST be a multiple of
+    # the granularity value.
+    assert _amount % self.granularity == 0
     # check if msg.sender is operator for _from
     # TODO: also check for defaultOperators
     assert operators[_from][msg.sender]
