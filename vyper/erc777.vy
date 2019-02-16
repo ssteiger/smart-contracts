@@ -70,7 +70,7 @@ Sent: event({
 
 # STATE VARIABLES:
 name: public(string[32])
-symbol: public(string[32])
+symbol: public(string[16])
 totalSupply: public(uint256)
 granularity: public(uint256)
 
@@ -91,20 +91,21 @@ ERC165_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000
 
 # METHODS:
 @public
-def __init__(_name: string,
-             _symbol: string,
+def __init__(_name: string[32],
+             _symbol: string[16],
              _totalSupply: uint256,
              _granularity: uint256,
              _defaultOperators: bytes[address]=""
-           ):
+            ):
     self.name = _name
     self.symbol = _symbol
     self.totalSupply = _totalSupply
-    # MUST be greater or equal to 1
-    # TODO:
+    # granularity MUST be greater or equal to 1
+    assert _granularity > 0
     self.granularity = _granularity
     # The token MUST define default operators at creation time
     # The token contract MUST NOT add or remove default operators ever
+    # TODO: this is not correct
     self.defaultOperators = _defaultOperators
     # set supported interfaces
     self.supportedInterfaces[ERC165_INTERFACE_ID] = True
