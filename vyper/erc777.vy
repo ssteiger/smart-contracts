@@ -264,10 +264,9 @@ def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]="")
     # NOTE: The operator MAY pass information
     # check if msg.sender is operator for _from
     # NOTE: An address MUST always be an operator for itself
-    isSelf: bool = msg.sender == _from
-    isDefaultOperator: bool = self.defaultOperators[_from]
-    isOperator: bool = (self.operators[_from])[msg.sender]
-    assert (isSelf or isDefaultOperator or isOperator)
+    # check if msg.sender is operator for _from
+    isOperatorFor: bool = self.isOperatorFor(msg.sender, _from)
+    assert isOperatorFor
     # Any minting, send or burning of tokens MUST be a multiple of
     # the granularity value.
     assert _amount % self.granularity == 0
