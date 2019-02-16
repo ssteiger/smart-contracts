@@ -78,7 +78,7 @@ balanceOf: map(address, uint256)
 # The token MAY define default operators.
 # A default operator is an implicitly authorized operator for all token holders.
 defaultOperators: public(map(address, bool))
-operators: public(map(address, address))
+operators: public(map(address, map(address, bool)))
 
 supportedInterfaces: public(map(bytes32, bool))
 
@@ -129,7 +129,7 @@ def supportsInterface(_interfaceID: bytes32) -> bool:
 
 
 @public
-# TODO: A token holder MAY have multiple operators at the same time
+# NOTE: A token holder MAY have multiple operators at the same time
 def authorizeOperator(_operator: address):
     self.operators[msg.sender][_operator] = True
 
@@ -147,7 +147,7 @@ def isOperatorFor(_operator: address, _tokenHolder: address) -> bool:
     # default operators
     isDefaultOperator: bool = self.defaultOperators[_operator]
     # operators
-    isOperator: bool = self.operators[_tokenHolder][_operator]
+    isOperator: bool = (self.operators[_tokenHolder])[_operator]
 
     isOperatorFor: bool = (isSelf or isDefaultOperator or isOperator)
     return isOperatorFor
@@ -266,7 +266,7 @@ def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]="")
     # NOTE: An address MUST always be an operator for itself
     isSelf: bool = msg.sender == _from
     isDefaultOperator: bool = self.defaultOperators[_from]
-    isOperator: bool = self.operators[_from][msg.sender]
+    isOperator: bool = (self.operators[_from])[msg.sender]
     assert (isSelf or isDefaultOperator or isOperator)
     # Any minting, send or burning of tokens MUST be a multiple of
     # the granularity value.
