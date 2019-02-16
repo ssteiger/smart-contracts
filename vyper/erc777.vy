@@ -228,15 +228,23 @@ def operatorSend(_from: address,
     # check if msg.sender is operator for _from
     isOperatorFor: bool = self.isOperatorFor(msg.sender, _from)
     assert isOperatorFor
+    # check if `msg.sender` is a contract address
+    if msg.sender.is_contract:
+        # The token contract MUST call the `tokensToSend` hook of the token holder
+        # if the token holder registers an `ERC777TokensSender` implementation via ERC820
+        # The token contract MUST call the `tokensToSend` hook before updating the state
+        self._checkForERC777TokensInterface_Sender("", msg.sender, _to, _amount, _data, "")
+    # Update the state
+    # substract balance from sender
+    self.balanceOf[_from] -= _amount
+    # add balance to recipient
+    self.balanceOf[_to] += _amount
     # check if `_to` is a contract address
     if _to.is_contract:
         # The token contract MUST call the `tokensReceived` hook of the recipient
         # if the recipient registers an `ERC777TokensRecipient` implementation via ERC820
         self._checkForERC777TokensInterface_Recipient(msg.sender, _from, _to, _amount, _data, _operatorData)
 
-    self.balanceOf[_from] -= _amount
-    # add balance to recipient
-    self.balanceOf[_to] += _amount
     # fire sent event
     log.Sent(msg.sender, _from, _to, _amount, _data, _operatorData)
 
