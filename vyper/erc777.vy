@@ -1,13 +1,14 @@
-# ERC777 Token Standard (https://eips.ethereum.org/EIPS/eip-777)
-
 # Author: Sören Steiger, github.com/ssteiger
 # License: MIT
+
+# ERC777 Token Standard (https://eips.ethereum.org/EIPS/eip-777)
+
 
 # NOTICE: This contract is a work-in-progress and should not be used in production!
 
 # TODO: complete implementation of 'defaultOperators'
 
-# Interface for the contract called by safeTransferFrom()
+# Interface for ERC777Tokens sender contracts
 contract ERC777TokensSender:
     def tokensToSend(
         _operator: address,
@@ -18,6 +19,7 @@ contract ERC777TokensSender:
         _operatorData: bytes[256]
     ) -> bytes32: constant
 
+# Interface for ERC777Tokens recipient contracts
 contract ERC777TokensRecipient:
     def tokensReceived(
         _operator: address,
@@ -195,18 +197,19 @@ def send(_to: address, _amount: uint256, _data: bytes[256]=""):
     if msg.sender.is_contract:
         # The token contract MUST call the `tokensToSend` hook of the token holder
         # if the token holder registers an `ERC777TokensSender` implementation via ERC820
+        # The token contract MUST call the `tokensToSend` hook before updating the state
         self._checkForERC777TokensInterface_Sender("", msg.sender, _to, _amount, _data, "")
-
-    # check if `_to` is a contract address
-    if _to.is_contract:
-        # The token contract MUST call the `tokensReceived` hook of the recipient
-        # if the recipient registers an `ERC777TokensRecipient` implementation via ERC820
-        self._checkForERC777TokensInterface_Recipient("", msg.sender, _to, _amount, _data, "")
-
+    # Update the state
     # substract balance from sender
     self.balanceOf[msg.sender] -= _amount
     # add balance to recipient
     self.balanceOf[_to] += _amount
+    # check if `_to` is a contract address
+    if _to.is_contract:
+        # The token contract MUST call the `tokensReceived` hook of the recipient
+        # if the recipient registers an `ERC777TokensRecipient` implementation via ERC820
+        # The token contract MUST call the `tokensReceived` hook after updating the state
+        self._checkForERC777TokensInterface_Recipient("", msg.sender, _to, _amount, _data, "")
     # fire sent event
     log.Sent("", msg.sender, _to, _amount, _data, "")
 
@@ -223,9 +226,8 @@ def operatorSend(_from: address,
     # the granularity value.
     assert _amount % self.granularity == 0
     # check if msg.sender is operator for _from
-    isDefaultOperator: bool = self.defaultOperators[_from]
-    isOperator: bool = self.operators[_from][msg.sender]
-    assert (isDefaultOperator or isOperator)
+    isOperatorFor: bool = self.isOperatorFor(msg.sender, _from)
+    assert isOperatorFor
     # check if `_to` is a contract address
     if _to.is_contract:
         # The token contract MUST call the `tokensReceived` hook of the recipient
