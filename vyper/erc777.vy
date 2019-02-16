@@ -101,6 +101,7 @@ def __init__(_name: string,
     self.symbol = _symbol
     self.totalSupply = _totalSupply
     # MUST be greater or equal to 1
+    # TODO:
     self.granularity = _granularity
     # The token MUST define default operators at creation time
     # The token contract MUST NOT add or remove default operators ever
@@ -129,7 +130,7 @@ def supportsInterface(_interfaceID: bytes32) -> bool:
 
 
 @public
-# NOTE: A token holder MAY have multiple operators at the same time
+# NOTE: A token holder MAY have multiple operators at the same time.
 def authorizeOperator(_operator: address):
     self.operators[msg.sender][_operator] = True
 
@@ -165,7 +166,7 @@ def _checkForERC777TokensInterface_Sender(_operator: address,
                                          ):
     # check if token holder registers an `ERC777TokensSender` implementation via ERC820
     # TODO: check if function paramters are correct (next 2 lines)
-    # NOTE: This makes the call (call executes) and returns the bytestring
+    # NOTE: This makes the call (call executes) and returns the bytestring.
     returnValue: bytes32 = ERC777TokensSender(_from).tokensToSend(_operator, _from, _to, _amount, _data, _operatorData)
     assert returnValue == method_id("tokensToSend(address,address,address,uint256,bytes,bytes)", bytes32)
 
@@ -182,36 +183,49 @@ def _checkForERC777TokensInterface_Recipient(_operator: address,
                                             ):
     # check if recipient implements the `ER777TokenRecipient` interface via ERC820
     # TODO: check if function paramters are correct (next 2 lines)
-    # NOTE: This makes the call (call executes) and returns the bytestring
+    # NOTE: This makes the call (call executes) and returns the bytestring.
     returnValue: bytes32 = ERC777TokensRecipient(_to).tokensReceived(_operator, _from, _to, _amount, _data, _operatorData)
     assert returnValue == method_id("tokensReceived(address,address,address,uint256,bytes,bytes)", bytes32)
 
 
-@public
-def send(_to: address, _amount: uint256, _data: bytes[256]=""):
-    assert _to != ZERO_ADDRESS
+@private
+def _transferFunds(_operator: address,
+                   _from: address,
+                   _to: address,
+                   _amount: uint256,
+                   _data: bytes[256]="",
+                   _operatorData: bytes[256]=""
+                  ):
     # Any minting, send or burning of tokens MUST be a multiple of
     # the granularity value.
     assert _amount % self.granularity == 0
     # check if `msg.sender` is a contract address
     if msg.sender.is_contract:
         # The token contract MUST call the `tokensToSend` hook of the token holder
-        # if the token holder registers an `ERC777TokensSender` implementation via ERC820
-        # The token contract MUST call the `tokensToSend` hook before updating the state
-        self._checkForERC777TokensInterface_Sender("", msg.sender, _to, _amount, _data)
+        # if the token holder registers an `ERC777TokensSender` implementation via ERC820.
+        # The token contract MUST call the `tokensToSend` hook before updating the state.
+        self._checkForERC777TokensInterface_Sender(_operator, msg.sender, _to, _amount, _data, _operatorData)
     # Update the state
     # substract balance from sender
     self.balanceOf[msg.sender] -= _amount
     # add balance to recipient
     self.balanceOf[_to] += _amount
-    # check if `_to` is a contract address
-    if _to.is_contract:
-        # The token contract MUST call the `tokensReceived` hook of the recipient
-        # if the recipient registers an `ERC777TokensRecipient` implementation via ERC820
-        # The token contract MUST call the `tokensReceived` hook after updating the state
-        self._checkForERC777TokensInterface_Recipient("", msg.sender, _to, _amount, _data)
+    # only check for `tokensReceived` hook if transfer is not a burn
+    if _to not ZERO_ADDRESS:
+        # check if `_to` is a contract address
+        if _to.is_contract:
+            # The token contract MUST call the `tokensReceived` hook of the recipient
+            # if the recipient registers an `ERC777TokensRecipient` implementation via ERC820.
+            # The token contract MUST call the `tokensReceived` hook after updating the state.
+            self._checkForERC777TokensInterface_Recipient(_operator, msg.sender, _to, _amount, _data, _operatorData)
+
+
+@public
+def send(_to: address, _amount: uint256, _data: bytes[256]=""):
+    assert _to != ZERO_ADDRESS
+    self._transferFunds(msg.sender, msg.sender, _to, _amount, _data)
     # fire sent event
-    log.Sent("", msg.sender, _to, _amount, _data, "")
+    log.Sent(msg.sender, msg.sender, _to, _amount, _data)
 
 
 @public
@@ -222,50 +236,18 @@ def operatorSend(_from: address,
                  _operatorData: bytes[256]=""
                ):
     assert _to != ZERO_ADDRESS
-    # Any minting, send or burning of tokens MUST be a multiple of
-    # the granularity value.
-    assert _amount % self.granularity == 0
     # check if msg.sender is operator for _from
     isOperatorFor: bool = self.isOperatorFor(msg.sender, _from)
     assert isOperatorFor
-    # check if `msg.sender` is a contract address
-    if msg.sender.is_contract:
-        # The token contract MUST call the `tokensToSend` hook of the token holder
-        # if the token holder registers an `ERC777TokensSender` implementation via ERC820
-        # The token contract MUST call the `tokensToSend` hook before updating the state
-        self._checkForERC777TokensInterface_Sender(msg.sender, _from, _to, _amount, _data, _operatorData)
-    # Update the state
-    # substract balance from sender
-    self.balanceOf[_from] -= _amount
-    # add balance to recipient
-    self.balanceOf[_to] += _amount
-    # check if `_to` is a contract address
-    if _to.is_contract:
-        # The token contract MUST call the `tokensReceived` hook of the recipient
-        # if the recipient registers an `ERC777TokensRecipient` implementation via ERC820
-        # The token contract MUST call the `tokensReceived` hook after updating the state
-        self._checkForERC777TokensInterface_Recipient(msg.sender, _from, _to, _amount, _data, _operatorData)
+    self._transferFunds(msg.sender, _from, _to, _amount, _data, _operatorData)
     # fire sent event
     log.Sent(msg.sender, _from, _to, _amount, _data, _operatorData)
 
 
 @public
 def burn(_amount: uint256):
-    # Any minting, send or burning of tokens MUST be a multiple of
-    # the granularity value.
-    assert _amount % self.granularity == 0
-    # check if `msg.sender` is a contract address
-    if msg.sender.is_contract:
-        # The `tokensToSend` hook MUST be called every time the balance is decremented
-        # The token contract MUST call the `tokensToSend` hook before updating the state
-        self._checkForERC777TokensInterface_Sender(msg.sender, msg.sender, ZERO_ADDRESS, _amount)
-    # The operator and the token holder MUST both be the msg.sender
-    # remove amount from sender
-    self.balanceOf[msg.sender] -= _amount
-    # burn
-    self.balanceOf[ZERO_ADDRESS] += _amount
-    # update totalSupply
-    self.totalSupply -= _amount
+    # burn tokens
+    self._transferFunds(msg.sender, msg.sender, ZERO_ADDRESS, _amount, _data)
     # fire burned event
     # NOTE: quoting @0xjac:
     #       In `Sent`, the `userData` is intended for the recipient not the sender.
@@ -275,26 +257,12 @@ def burn(_amount: uint256):
 
 @public
 def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]=""):
-    # NOTE: The operator MAY pass information
+    # NOTE: An address MUST always be an operator for itself.
+    #       The operator MUST be msg.sender.
     # check if msg.sender is operator for _from
-    # NOTE: An address MUST always be an operator for itself
-    # The operator MUST be msg.sender
     isOperatorFor: bool = self.isOperatorFor(msg.sender, _from)
     assert isOperatorFor
-    # Any minting, send or burning of tokens MUST be a multiple of
-    # the granularity value.
-    assert _amount % self.granularity == 0
-    # check if `msg.sender` is a contract address
-    if msg.sender.is_contract:
-        # The `tokensToSend` hook MUST be called every time the balance is decremented
-        # The token contract MUST call the `tokensToSend` hook before updating the state
-        self._checkForERC777TokensInterface_Sender(msg.sender, _from, ZERO_ADDRESS, _amount, "", _operatorData)
-    # The operator and the token holder MUST both be the msg.sender
-    # remove from balance
-    self.balanceOf[_from] -= _amount
-    # burn
-    self.balanceOf[ZERO_ADDRESS] += _amount
-    # update totalSupply
-    self.totalSupply -= _amount
+    # burn tokens
+    self._transferFunds(msg.sender, _from, ZERO_ADDRESS, _amount, _data)
     # fire burned event
     log.Burned(msg.sender, _from, _amount, _operatorData)
