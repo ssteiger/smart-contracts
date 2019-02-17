@@ -86,10 +86,10 @@ operators: public(map(address, map(address, bool)))
 supportedInterfaces: public(map(bytes32, bool))
 
 # ERC165 interface ID of ERC165
-# TODO: shorten this -> constant(bytes32) = convert(1ffc9a7, bytes32)
+# TODO: shorten this -> maybe: constant(bytes32) = convert(1ffc9a7, bytes32)
 ERC165_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000000000000000000000001ffc9a7
 # TODO: implement this
-#ERC777_INTERFACE_ID: constant(bytes32) = bytes4(keccak256(this))
+#ERC777_INTERFACE_ID: constant(bytes32) = bytes32(keccak256(this))
 
 
 # METHODS:
@@ -101,8 +101,9 @@ def __init__(_name: string[32],
              _defaultOperators: bytes[address]=""
             ):
     # owner is allowed do perform mint()
+    # NOTE: this is not defined in the spec
     self.owner = msg.sender
-    # set name and symbol
+    # set token name and symbol
     self.name = _name
     self.symbol = _symbol
     # granularity MUST be greater or equal to 1
@@ -229,6 +230,7 @@ def _transferFunds(_operator: address,
 
 @public
 def send(_to: address, _amount: uint256, _data: bytes[256]=""):
+    # NOTE: The operator and the token holder MUST both be the msg.sender
     assert _to != ZERO_ADDRESS
     self._transferFunds(msg.sender, msg.sender, _to, _amount, _data)
     # fire sent event
@@ -282,7 +284,8 @@ def mint(_operator: address,
          _data: bytes[256]="",
          _operatorData: bytes[256]=""
         ):
-    # only owner is allowed to mint (NOTE: this is not defined in the spec)
+    # only owner is allowed to mint
+    # NOTE: this is not defined in the spec
     assert msg.sender == self.owner #or self.defaultOperators[msg.sender]
     # The token contract MUST revert if the address of the recipient is 0x0
     assert _to != ZERO_ADDRESS
