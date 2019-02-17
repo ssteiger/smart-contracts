@@ -37,7 +37,8 @@ Minted: event({
     _operator: indexed(address),
     _to: indexed(address),
     _amount: uint256,
-    _data: bytes[256]
+    _data: bytes[256],
+    _operatorData: bytes[256]
 })
 
 # TODO: https://github.com/ethereum/EIPs/issues/777#issuecomment-461967464
@@ -69,6 +70,8 @@ Sent: event({
 
 
 # STATE VARIABLES:
+owner: public(address)
+
 name: public(string[32])
 symbol: public(string[16])
 totalSupply: public(uint256)
@@ -97,9 +100,11 @@ def __init__(_name: string[32],
              _granularity: uint256,
              _defaultOperators: bytes[address]=""
             ):
+    # owner is allowed do perform mint()
+    self.owner = msg.sender
+    # set name and symbol
     self.name = _name
     self.symbol = _symbol
-    self.totalSupply = _totalSupply
     # granularity MUST be greater or equal to 1
     assert _granularity > 0
     self.granularity = _granularity
@@ -112,6 +117,7 @@ def __init__(_name: string[32],
     # TODO:
     #self.supportedInterfaces[ERC777_INTERFACE_ID] = True
     # mint tokens
+    self.totalSupply = _totalSupply
     self.balanceOf[msg.sender] = _totalSupply
     # fire minted event
     log.Minted(msg.sender, msg.sender, _totalSupply, _data)
@@ -197,8 +203,8 @@ def _transferFunds(_operator: address,
                    _data: bytes[256]="",
                    _operatorData: bytes[256]=""
                   ):
-    # Any minting, send or burning of tokens MUST be a multiple of
-    # the granularity value.
+    # Any minting, send or burning of tokens MUST be a multiple of the
+    # granularity value.
     assert _amount % self.granularity == 0
     # check if `msg.sender` is a contract address
     if msg.sender.is_contract:
@@ -207,13 +213,13 @@ def _transferFunds(_operator: address,
         # The token contract MUST call the `tokensToSend` hook before updating the state.
         self._checkForERC777TokensInterface_Sender(_operator, msg.sender, _to, _amount, _data, _operatorData)
     # Update the state
-    # substract balance from sender
+    # update balance of sender
     self.balanceOf[msg.sender] -= _amount
-    # add balance to recipient
+    # update balance of recipient
     self.balanceOf[_to] += _amount
     # only check for `tokensReceived` hook if transfer is not a burn
     if _to not ZERO_ADDRESS:
-        # check if `_to` is a contract address
+        # check if recipient is a contract address
         if _to.is_contract:
             # The token contract MUST call the `tokensReceived` hook of the recipient
             # if the recipient registers an `ERC777TokensRecipient` implementation via ERC820.
@@ -267,3 +273,34 @@ def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]="")
     self._transferFunds(msg.sender, _from, ZERO_ADDRESS, _amount, _data)
     # fire burned event
     log.Burned(msg.sender, _from, _amount, _operatorData)
+
+
+@public
+def mint(_operator: address,
+         _to: address,
+         _amount: uint256,
+         _data: bytes[256]="",
+         _operatorData: bytes[256]=""
+        ):
+    # only owner is allowed to mint (NOTE: this is not defined in the spec)
+    assert msg.sender == self.owner #or self.defaultOperators[msg.sender]
+    # The token contract MUST revert if the address of the recipient is 0x0
+    assert _to != ZERO_ADDRESS
+    # Any minting, send or burning of tokens MUST be a multiple of the
+    # granularity value.
+    assert _amount % self.granularity == 0
+    # mint tokens
+    # add minted tokens to balance of recipient
+    self.balanceOf[_to] += _amount
+    # update total supply
+    self.totalSupply += _amount
+    # check if recipient is a contract address
+    if _to.is_contract:
+        # The token contract MUST revert if the recipient is a contract, and
+        # does not implement the `ERC777TokensRecipient` interface via ERC820.
+        # The token contract MUST call the `tokensReceived` hook after
+        # updating the state
+        # from: token holder for a send and 0x for a mint
+        self._checkForERC777TokensInterface_Recipient(_operator, ZERO_ADDRESS, _to, _amount, _data, _operatorData)
+    # fire minted event
+    log.Minted(msg.sender, _to, _amount, _data, _operatorData)
