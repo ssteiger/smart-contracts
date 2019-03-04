@@ -27,7 +27,7 @@ Approval: event({_owner: indexed(address), _spender: indexed(address), _value: u
 # Returns the name of the token - e.g. "MyToken".
 # OPTIONAL - This method can be used to improve usability, but interfaces and
 #            other contracts MUST NOT expect these values to be present.
-name: public(string[16]) # TODO: is this an acceptable size?
+name: public(string[32]) # TODO: is this an acceptable size?
 
 # ----- symbol -----
 # Returns the symbol of the token. E.g. "HIX".
@@ -54,11 +54,11 @@ approvedFunds: map(address, map(address, uint256))
 # TODO: do the constructor arguments 'name' and 'symbol' need to be somehow
 #       bounded to the defined state string array size?
 @public
-def __init__(_name: string, _symbol: string, _decimals: uint256, totalSupply: uint256):
+def __init__(_name: string[32], _symbol: string[16], _decimals: uint256, _totalSupply: uint256):
     self.name = _name
     self.symbol = _symbol
     self.decimals = _decimals
-    self.totalSupply = totalSupply * 10 ** _decimals
+    self.totalSupply = _totalSupply * 10 ** _decimals
     # mint all tokens to the contract creator
     self.balanceOf[msg.sender] = self.totalSupply
     # fire transfer event
