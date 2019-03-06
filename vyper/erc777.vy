@@ -221,10 +221,10 @@ def _transferFunds(_operator: address,
         # The token contract MUST call the `tokensToSend` hook of the token holder
         # if the token holder registers an `ERC777TokensSender` implementation via ERC820.
         # The token contract MUST call the `tokensToSend` hook before updating the state.
-        self._checkForERC777TokensInterface_Sender(_operator, msg.sender, _to, _amount, _data, _operatorData)
+        self._checkForERC777TokensInterface_Sender(_operator, _from, _to, _amount, _data, _operatorData)
     # Update the state
     # update balance of sender
-    self.balanceOf[msg.sender] -= _amount
+    self.balanceOf[_from] -= _amount
     # update balance of recipient
     self.balanceOf[_to] += _amount
     # only check for `tokensReceived` hook if transfer is not a burn
@@ -234,7 +234,7 @@ def _transferFunds(_operator: address,
             # The token contract MUST call the `tokensReceived` hook of the recipient
             # if the recipient registers an `ERC777TokensRecipient` implementation via ERC820.
             # The token contract MUST call the `tokensReceived` hook after updating the state.
-            self._checkForERC777TokensInterface_Recipient(_operator, msg.sender, _to, _amount, _data, _operatorData)
+            self._checkForERC777TokensInterface_Recipient(_operator, _from, _to, _amount, _data, _operatorData)
 
 
 @public
