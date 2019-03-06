@@ -217,7 +217,7 @@ def _transferFunds(_operator: address,
     # granularity value.
     assert _amount % self.granularity == 0
     # check if `msg.sender` is a contract address
-    if msg.sender.is_contract:
+    if _from.is_contract:
         # The token contract MUST call the `tokensToSend` hook of the token holder
         # if the token holder registers an `ERC777TokensSender` implementation via ERC820.
         # The token contract MUST call the `tokensToSend` hook before updating the state.
