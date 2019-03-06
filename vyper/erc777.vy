@@ -32,7 +32,9 @@ contract ERC777TokensRecipient:
 
 
 # EVENTS:
+# TODO:
 # https://github.com/ethereum/EIPs/issues/777#issuecomment-461967464
+# https://github.com/ethereum/EIPs/issues/777#issuecomment-465987000
 Minted: event({
     _operator: indexed(address),
     _to: indexed(address),
@@ -41,11 +43,13 @@ Minted: event({
     _operatorData: bytes[256]
 })
 
-# TODO: https://github.com/ethereum/EIPs/issues/777#issuecomment-461967464
+# TODO:
+# https://github.com/ethereum/EIPs/issues/777#issuecomment-461967464
 Burned: event({
     _operator: indexed(address),
     _from: indexed(address),
     _amount: uint256,
+    _data: bytes[256],
     _operatorData: bytes[256]
 })
 
@@ -115,7 +119,7 @@ def __init__(_name: string[32],
     # The token contract MUST NOT add or remove default operators ever
     # TODO: This is not correct:
     #       Cannot copy mappings; can only copy individual elements
-    self.defaultOperators = _defaultOperators
+    # self.defaultOperators = _defaultOperators
     # set supported interfaces
     self.supportedInterfaces[ERC165_INTERFACE_ID] = True
     # TODO:
@@ -124,7 +128,9 @@ def __init__(_name: string[32],
     self.totalSupply = _totalSupply
     self.balanceOf[msg.sender] = _totalSupply
     # fire minted event
-    log.Minted(msg.sender, msg.sender, _totalSupply, _data)
+    data: string = ""
+    operatorData: string = ""
+    log.Minted(msg.sender, msg.sender, _totalSupply, data, operatorData)
 
 
 # def defaultOperators()
