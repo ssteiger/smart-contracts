@@ -243,7 +243,7 @@ def send(_to: address, _amount: uint256, _data: bytes[256]=""):
     assert _to != ZERO_ADDRESS
     self._transferFunds(msg.sender, msg.sender, _to, _amount, _data)
     # fire sent event
-    log.Sent(msg.sender, msg.sender, _to, _amount, _data)
+    log.Sent(msg.sender, msg.sender, _to, _amount, _data, "")
 
 
 @public
