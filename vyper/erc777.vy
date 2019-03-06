@@ -128,8 +128,8 @@ def __init__(_name: string[32],
     self.totalSupply = _totalSupply
     self.balanceOf[msg.sender] = _totalSupply
     # fire minted event
-    data: string = ""
-    operatorData: string = ""
+    data: bytes[256] = ""
+    operatorData: bytes[256] = ""
     log.Minted(msg.sender, msg.sender, _totalSupply, data, operatorData)
 
 
