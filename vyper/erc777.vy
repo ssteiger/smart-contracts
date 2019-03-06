@@ -8,6 +8,8 @@
 
 # TODO: complete implementation of 'defaultOperators'
 
+
+# INTERFACES:
 # Interface for ERC777Tokens sender contracts
 contract ERC777TokensSender:
     def tokensToSend(
@@ -166,7 +168,7 @@ def isOperatorFor(_operator: address, _tokenHolder: address) -> bool:
     isDefaultOperator: bool = self.defaultOperators[_operator]
     # operators
     isOperator: bool = (self.operators[_tokenHolder])[_operator]
-
+    # at least one of the above
     isOperatorFor: bool = (isSelf or isDefaultOperator or isOperator)
     return isOperatorFor
 
@@ -213,14 +215,14 @@ def _transferFunds(_operator: address,
                    _data: bytes[256]="",
                    _operatorData: bytes[256]=""
                   ):
-    # Any minting, send or burning of tokens MUST be a multiple of the
-    # granularity value.
+    # NOTE: Any minting, send or burning of tokens MUST be a multiple of the
+    #       granularity value.
     assert _amount % self.granularity == 0
     # check if `msg.sender` is a contract address
     if _from.is_contract:
-        # The token contract MUST call the `tokensToSend` hook of the token holder
-        # if the token holder registers an `ERC777TokensSender` implementation via ERC820.
-        # The token contract MUST call the `tokensToSend` hook before updating the state.
+        # NOTE: The token contract MUST call the `tokensToSend` hook of the token holder
+        #       if the token holder registers an `ERC777TokensSender` implementation via ERC820.
+        #       The token contract MUST call the `tokensToSend` hook before updating the state.
         self._checkForERC777TokensInterface_Sender(_operator, _from, _to, _amount, _data, _operatorData)
     # Update the state
     # update balance of sender
@@ -231,9 +233,9 @@ def _transferFunds(_operator: address,
     if _to != ZERO_ADDRESS:
         # check if recipient is a contract address
         if _to.is_contract:
-            # The token contract MUST call the `tokensReceived` hook of the recipient
-            # if the recipient registers an `ERC777TokensRecipient` implementation via ERC820.
-            # The token contract MUST call the `tokensReceived` hook after updating the state.
+            # NOTE: The token contract MUST call the `tokensReceived` hook of the recipient
+            #       if the recipient registers an `ERC777TokensRecipient` implementation via ERC820.
+            #       The token contract MUST call the `tokensReceived` hook after updating the state.
             self._checkForERC777TokensInterface_Recipient(_operator, _from, _to, _amount, _data, _operatorData)
 
 
@@ -308,10 +310,10 @@ def mint(_operator: address,
     self.totalSupply += _amount
     # check if recipient is a contract address
     if _to.is_contract:
-        # The token contract MUST revert if the recipient is a contract, and
-        # does not implement the `ERC777TokensRecipient` interface via ERC820.
-        # The token contract MUST call the `tokensReceived` hook after
-        # updating the state
+        # NOTE: The token contract MUST revert if the recipient is a contract, and
+        #       does not implement the `ERC777TokensRecipient` interface via ERC820.
+        #       The token contract MUST call the `tokensReceived` hook after
+        #       updating the state
         # from: token holder for a send and 0x for a mint
         self._checkForERC777TokensInterface_Recipient(_operator, ZERO_ADDRESS, _to, _amount, _data, _operatorData)
     # fire minted event
