@@ -99,14 +99,14 @@ ERC165_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000
 
 
 # METHODS:
-# TODO: defining 'bytes[address]' currently does not work
-#       see: https://github.com/ethereum/vyper/issues/1332
+# TODO:
+# see: https://github.com/ethereum/vyper/issues/1332
 @public
 def __init__(_name: string[32],
              _symbol: string[16],
              _totalSupply: uint256,
              _granularity: uint256,
-             _defaultOperators: bytes[20]
+             _defaultOperators: address[4]
             ):
     # owner is allowed do perform mint()
     # NOTE: this is not defined in the spec
@@ -119,9 +119,9 @@ def __init__(_name: string[32],
     self.granularity = _granularity
     # The token MUST define default operators at creation time
     # The token contract MUST NOT add or remove default operators ever
-    # TODO: This is not correct:
-    #       Cannot copy mappings; can only copy individual elements
-    # self.defaultOperators = _defaultOperators
+    for i in range(4):
+        if _defaultOperators[i] != ZERO_ADDRESS:
+            self.defaultOperators[_defaultOperators[i]] = True
     # set supported interfaces
     self.supportedInterfaces[ERC165_INTERFACE_ID] = True
     # TODO:
