@@ -286,7 +286,6 @@ def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]="")
 def mint(_operator: address,
          _to: address,
          _amount: uint256,
-         _data: bytes[256]="",
          _operatorData: bytes[256]=""
         ):
     # only owner is allowed to mint
@@ -309,6 +308,6 @@ def mint(_operator: address,
         #       The token contract MUST call the `tokensReceived` hook after
         #       updating the state
         # from: token holder for a send and 0x for a mint
-        self._checkForERC777TokensInterface_Recipient(_operator, ZERO_ADDRESS, _to, _amount, _data, _operatorData)
+        self._checkForERC777TokensInterface_Recipient(_operator, ZERO_ADDRESS, _to, _amount, "", _operatorData)
     # fire minted event
     log.Minted(msg.sender, _to, _amount, _operatorData)
