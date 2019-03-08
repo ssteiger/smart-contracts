@@ -45,34 +45,35 @@ Minted: event({
 # TODO:
 # https://github.com/ethereum/EIPs/issues/777#issuecomment-461967464
 Burned: event({
-    _operator: indexed(address),
-    _from: indexed(address),
-    _amount: uint256,
-    _data: bytes[256],
-    _operatorData: bytes[256]
+    _operator: indexed(address), # Address which triggered the burn.
+    _from: indexed(address),     # Token holder whose tokens are burned.
+    _amount: uint256,            # Token holder whose tokens are burned.
+    _data: bytes[256],           # Information provided by the token holder.
+    _operatorData: bytes[256]    # Information provided by the operator.
 })
 
 AuthorizedOperator: event({
-    _operator: indexed(address),
-    _tokenHolder: indexed(address)
+    _operator: indexed(address),   # A ddress which became an operator of tokenHolder.
+    _tokenHolder: indexed(address) # Address of a token holder which authorized the operator address as an operator.
 })
 
 RevokedOperator: event({
-    _operator: indexed(address),
-    _tokenHolder: indexed(address)
+    _operator: indexed(address),   # Address which was revoked as an operator of tokenHolder.
+    _tokenHolder: indexed(address) # Address of a token holder which revoked the operator address as an operator.
 })
 
 Sent: event({
-    _operator: indexed(address),
-    _from: indexed(address),
-    _to: indexed(address),
-    _amount: uint256,
-    _data: bytes[256],
-    _operatorData: bytes[256]
+    _operator: indexed(address), # Address which triggered the send.
+    _from: indexed(address),     # Token holder.
+    _to: indexed(address),       # Token recipient.
+    _amount: uint256,            # Number of tokens to send.
+    _data: bytes[256],           # Information provided by the token holder.
+    _operatorData: bytes[256]    # Information provided by the operator.
 })
 
 
 # STATE VARIABLES:
+# NOTE: this is not defined in the spec
 owner: public(address)
 
 name: public(string[32])
@@ -236,21 +237,24 @@ def _transferFunds(_operator: address,
 
 
 @public
-def send(_to: address, _amount: uint256, _data: bytes[256]=""):
+def send(_to: address,        # Token recipient.
+         _amount: uint256,    # Number of tokens to send.
+         _data: bytes[256]="" # Information provided by the token holder.
+        ):
     # NOTE: The operator and the token holder MUST both be the msg.sender
     assert _to != ZERO_ADDRESS
-    self._transferFunds(msg.sender, msg.sender, _to, _amount, _data)
+    self._transferFunds(msg.sender, msg.sender, _to, _amount, _data, "")
     # fire sent event
     log.Sent(msg.sender, msg.sender, _to, _amount, _data, "")
 
 
 @public
-def operatorSend(_from: address,
-                 _to: address,
-                 _amount: uint256,
-                 _data: bytes[256]="",
-                 _operatorData: bytes[256]=""
-               ):
+def operatorSend(_from: address,              # Token holder (or 0x0 to set from to msg.sender).
+                 _to: address,                # Token recipient.
+                 _amount: uint256,            # Number of tokens to send.
+                 _data: bytes[256]="",        # Information provided by the token holder.
+                 _operatorData: bytes[256]="" # Information provided by the operator.
+                ):
     assert _to != ZERO_ADDRESS
     # check if msg.sender is operator for _from
     isOperatorFor: bool = self.isOperatorFor(msg.sender, _from)
@@ -261,9 +265,11 @@ def operatorSend(_from: address,
 
 
 @public
-def burn(_amount: uint256, _data: bytes[256]=""):
+def burn(_amount: uint256,    # Number of tokens to burn.
+         _data: bytes[256]="" # Information provided by the token holder.
+        ):
     # burn tokens
-    self._transferFunds(msg.sender, msg.sender, ZERO_ADDRESS, _amount, _data)
+    self._transferFunds(msg.sender, msg.sender, ZERO_ADDRESS, _amount, _data, "")
     # fire burned event
     # NOTE: quoting @0xjac:
     #       In `Sent`, the `userData` is intended for the recipient not the sender.
@@ -272,16 +278,21 @@ def burn(_amount: uint256, _data: bytes[256]=""):
 
 
 @public
-def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]=""):
+def operatorBurn(_from: address,              # Token holder whose tokens will be burned (or 0x0 to set from to msg.sender).
+                 _amount: uint256,            # Number of tokens to burn.
+                 _data: bytes[256]="",        # Information provided by the token holder.
+                 _operatorData: bytes[256]="" # Information provided by the operator.
+               ):
     # check if msg.sender is operator for _from
     isOperatorFor: bool = self.isOperatorFor(msg.sender, _from)
     assert isOperatorFor
     # burn tokens
-    self._transferFunds(msg.sender, _from, ZERO_ADDRESS, _amount, _operatorData)
+    self._transferFunds(msg.sender, _from, ZERO_ADDRESS, _amount, _data, _operatorData)
     # fire burned event
-    log.Burned(msg.sender, _from, _amount, "", _operatorData)
+    log.Burned(msg.sender, _from, _amount, _data, _operatorData)
 
 
+# NOTE: ERC777 intentionally does not define specific functions to mint tokens.
 @public
 def mint(_operator: address,
          _to: address,
@@ -291,10 +302,10 @@ def mint(_operator: address,
     # only owner is allowed to mint
     # NOTE: this is not defined in the spec
     assert msg.sender == self.owner #or self.defaultOperators[msg.sender]
-    # The token contract MUST revert if the address of the recipient is 0x0
+    # NOTE: The token contract MUST revert if the address of the recipient is 0x0
     assert _to != ZERO_ADDRESS
-    # Any minting, send or burning of tokens MUST be a multiple of the
-    # granularity value.
+    # NOTE: Any minting, send or burning of tokens MUST be a multiple of the
+    #       granularity value.
     assert _amount % self.granularity == 0
     # mint tokens
     # add minted tokens to balance of recipient
