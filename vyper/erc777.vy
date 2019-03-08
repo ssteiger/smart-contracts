@@ -53,7 +53,7 @@ Burned: event({
 })
 
 AuthorizedOperator: event({
-    _operator: indexed(address),   # A ddress which became an operator of tokenHolder.
+    _operator: indexed(address),   # Address which became an operator of tokenHolder.
     _tokenHolder: indexed(address) # Address of a token holder which authorized the operator address as an operator.
 })
 
@@ -106,13 +106,13 @@ def __init__(_name: string[32],
              _granularity: uint256,
              _defaultOperators: address[4]
             ):
-    # owner is allowed do perform mint()
+    # owner is allowed to perform mint()
     # NOTE: this is not defined in the spec
     self.owner = msg.sender
     # set token name and symbol
     self.name = _name
     self.symbol = _symbol
-    # granularity MUST be greater or equal to 1
+    # NOTE: granularity MUST be greater or equal to 1
     assert _granularity > 0
     self.granularity = _granularity
     # NOTE: The token MUST define default operators at creation time
@@ -241,8 +241,8 @@ def send(_to: address,        # Token recipient.
          _amount: uint256,    # Number of tokens to send.
          _data: bytes[256]="" # Information provided by the token holder.
         ):
-    # NOTE: The operator and the token holder MUST both be the msg.sender
     assert _to != ZERO_ADDRESS
+    # NOTE: The operator and the token holder MUST both be the msg.sender
     self._transferFunds(msg.sender, msg.sender, _to, _amount, _data, "")
     # fire sent event
     log.Sent(msg.sender, msg.sender, _to, _amount, _data, "")
@@ -271,9 +271,6 @@ def burn(_amount: uint256,    # Number of tokens to burn.
     # burn tokens
     self._transferFunds(msg.sender, msg.sender, ZERO_ADDRESS, _amount, _data, "")
     # fire burned event
-    # NOTE: quoting @0xjac:
-    #       In `Sent`, the `userData` is intended for the recipient not the sender.
-    #       With `Burned` there is no recipient so the `userData` would be intended to no one.
     log.Burned(msg.sender, msg.sender, _amount, _data, "")
 
 
@@ -282,7 +279,7 @@ def operatorBurn(_from: address,              # Token holder whose tokens will b
                  _amount: uint256,            # Number of tokens to burn.
                  _data: bytes[256]="",        # Information provided by the token holder.
                  _operatorData: bytes[256]="" # Information provided by the operator.
-               ):
+                ):
     # check if msg.sender is operator for _from
     isOperatorFor: bool = self.isOperatorFor(msg.sender, _from)
     assert isOperatorFor
@@ -317,8 +314,14 @@ def mint(_operator: address,
         # NOTE: The token contract MUST revert if the recipient is a contract, and
         #       does not implement the `ERC777TokensRecipient` interface via ERC820.
         #       The token contract MUST call the `tokensReceived` hook after
-        #       updating the state
-        # from: token holder for a send and 0x for a mint
+        #       updating the state.
+        #
+        #       The data and operatorData MUST be immutable during the entire
+        #       mint process—hence the same data and operatorData MUST be used
+        #       to call the tokensReceived hook and emit the Minted event.
+        #       The data field MUST be empty.
+        #
+        #       from: token holder for a send and 0x for a mint
         self._checkForERC777TokensInterface_Recipient(_operator, ZERO_ADDRESS, _to, _amount, "", _operatorData)
     # fire minted event
     log.Minted(msg.sender, _to, _amount, _operatorData)
