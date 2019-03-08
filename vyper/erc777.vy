@@ -320,7 +320,7 @@ def mint(_operator: address,
         #       updating the state.
         #
         #       The data and operatorData MUST be immutable during the entire
-        #       mint process—hence the same data and operatorData MUST be used
+        #       mint process — hence the same data and operatorData MUST be used
         #       to call the tokensReceived hook and emit the Minted event.
         #       The data field MUST be empty.
         #

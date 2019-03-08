@@ -8,7 +8,7 @@
 #         used in production!
 
 # TODO: Check that the ZERO_ADDRESS is the correct 'from' address
-#       for ERC20Token().transfer() (line 130)
+#       for ERC20Token().transfer() (line 135)
 
 contract ERC20Token:
     def transfer(to: address, value: uint256) -> bool: modifying
