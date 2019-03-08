@@ -261,14 +261,14 @@ def operatorSend(_from: address,
 
 
 @public
-def burn(_amount: uint256):
+def burn(_amount: uint256, _data: bytes[256]=""):
     # burn tokens
     self._transferFunds(msg.sender, msg.sender, ZERO_ADDRESS, _amount, _data)
     # fire burned event
     # NOTE: quoting @0xjac:
     #       In `Sent`, the `userData` is intended for the recipient not the sender.
     #       With `Burned` there is no recipient so the `userData` would be intended to no one.
-    log.Burned(msg.sender, msg.sender, _amount, "")
+    log.Burned(msg.sender, msg.sender, _amount, _data, "")
 
 
 @public
@@ -277,9 +277,9 @@ def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]="")
     isOperatorFor: bool = self.isOperatorFor(msg.sender, _from)
     assert isOperatorFor
     # burn tokens
-    self._transferFunds(msg.sender, _from, ZERO_ADDRESS, _amount, _data)
+    self._transferFunds(msg.sender, _from, ZERO_ADDRESS, _amount, _operatorData)
     # fire burned event
-    log.Burned(msg.sender, _from, _amount, _operatorData)
+    log.Burned(msg.sender, _from, _amount, "", _operatorData)
 
 
 @public
