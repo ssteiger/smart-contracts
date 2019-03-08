@@ -243,7 +243,7 @@ def send(_to: address,        # Token recipient.
         ):
     assert _to != ZERO_ADDRESS
     # NOTE: The operator and the token holder MUST both be the msg.sender
-    self._transferFunds(msg.sender, msg.sender, _to, _amount, _data, "")
+    self._transferFunds(msg.sender, msg.sender, _to, _amount, _data)
     # fire sent event
     log.Sent(msg.sender, msg.sender, _to, _amount, _data, "")
 
@@ -269,7 +269,7 @@ def burn(_amount: uint256,    # Number of tokens to burn.
          _data: bytes[256]="" # Information provided by the token holder.
         ):
     # burn tokens
-    self._transferFunds(msg.sender, msg.sender, ZERO_ADDRESS, _amount, _data, "")
+    self._transferFunds(msg.sender, msg.sender, ZERO_ADDRESS, _amount, _data)
     # fire burned event
     log.Burned(msg.sender, msg.sender, _amount, _data, "")
 
