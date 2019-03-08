@@ -273,18 +273,23 @@ def burn(_amount: uint256,    # Number of tokens to burn.
 
 
 @public
-def operatorBurn(_from: address,              # Token holder whose tokens will be burned (or 0x0 to set from to msg.sender).
+def operatorBurn(_from: address,              # Token holder whose tokens will be burned.
                  _amount: uint256,            # Number of tokens to burn.
                  _data: bytes[256]="",        # Information provided by the token holder.
                  _operatorData: bytes[256]="" # Information provided by the operator.
                 ):
+    # _from: Token holder whose tokens will be burned (or 0x0 to set from to msg.sender).
+    if _from == ZERO_ADDRESS:
+        fromAddress: address = msg.sender
+    else:
+        fromAddress: address = _from
     # check if msg.sender is operator for _from
-    isOperatorFor: bool = self.isOperatorFor(msg.sender, _from)
+    isOperatorFor: bool = self.isOperatorFor(msg.sender, fromAddress)
     assert isOperatorFor
     # burn tokens
-    self._transferFunds(msg.sender, _from, ZERO_ADDRESS, _amount, _data, _operatorData)
+    self._transferFunds(msg.sender, fromAddress, ZERO_ADDRESS, _amount, _data, _operatorData)
     # fire burned event
-    log.Burned(msg.sender, _from, _amount, _data, _operatorData)
+    log.Burned(msg.sender, fromAddress, _amount, _data, _operatorData)
 
 
 # NOTE: ERC777 intentionally does not define specific functions to mint tokens.
