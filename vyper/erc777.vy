@@ -6,8 +6,6 @@
 
 # NOTICE: This contract is a work-in-progress and should not be used in production!
 
-# TODO: complete implementation of 'defaultOperators'
-
 
 # INTERFACES:
 # Interface for ERC777Tokens sender contracts
@@ -41,7 +39,6 @@ Minted: event({
     _operator: indexed(address),
     _to: indexed(address),
     _amount: uint256,
-    _data: bytes[256],
     _operatorData: bytes[256]
 })
 
@@ -117,8 +114,8 @@ def __init__(_name: string[32],
     # granularity MUST be greater or equal to 1
     assert _granularity > 0
     self.granularity = _granularity
-    # The token MUST define default operators at creation time
-    # The token contract MUST NOT add or remove default operators ever
+    # NOTE: The token MUST define default operators at creation time
+    #       The token contract MUST NOT add or remove default operators ever
     for i in range(4):
         if _defaultOperators[i] != ZERO_ADDRESS:
             self.defaultOperators[_defaultOperators[i]] = True
@@ -130,9 +127,8 @@ def __init__(_name: string[32],
     self.totalSupply = _totalSupply
     self.balanceOf[msg.sender] = _totalSupply
     # fire minted event
-    data: bytes[256] = ""
     operatorData: bytes[256] = ""
-    log.Minted(msg.sender, msg.sender, _totalSupply, data, operatorData)
+    log.Minted(msg.sender, msg.sender, _totalSupply, operatorData)
 
 
 # def defaultOperators()
@@ -315,4 +311,4 @@ def mint(_operator: address,
         # from: token holder for a send and 0x for a mint
         self._checkForERC777TokensInterface_Recipient(_operator, ZERO_ADDRESS, _to, _amount, _data, _operatorData)
     # fire minted event
-    log.Minted(msg.sender, _to, _amount, _data, _operatorData)
+    log.Minted(msg.sender, _to, _amount, _operatorData)
