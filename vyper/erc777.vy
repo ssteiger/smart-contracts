@@ -277,8 +277,6 @@ def burn(_amount: uint256):
 
 @public
 def operatorBurn(_from: address, _amount: uint256, _operatorData: bytes[256]=""):
-    # NOTE: An address MUST always be an operator for itself.
-    #       The operator MUST be msg.sender.
     # check if msg.sender is operator for _from
     isOperatorFor: bool = self.isOperatorFor(msg.sender, _from)
     assert isOperatorFor
