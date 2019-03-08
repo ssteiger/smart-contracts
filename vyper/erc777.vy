@@ -146,8 +146,8 @@ def supportsInterface(_interfaceID: bytes32) -> bool:
 
 
 @public
-# NOTE: A token holder MAY have multiple operators at the same time.
 def authorizeOperator(_operator: address):
+    # NOTE: A token holder MAY have multiple operators at the same time.
     self.operators[msg.sender][_operator] = True
 
 
@@ -170,7 +170,7 @@ def isOperatorFor(_operator: address, _tokenHolder: address) -> bool:
     return isOperatorFor
 
 
-# TODO: verify that this check actually works
+# TODO: verify that this check works
 @private
 @constant
 def _checkForERC777TokensInterface_Sender(_operator: address,
@@ -181,13 +181,12 @@ def _checkForERC777TokensInterface_Sender(_operator: address,
                                           _operatorData: bytes[256]=""
                                          ):
     # check if token holder registers an `ERC777TokensSender` implementation via ERC820
-    # TODO: check if function paramters are correct (next 2 lines)
     # NOTE: This makes the call (call executes) and returns the bytestring.
     returnValue: bytes32 = ERC777TokensSender(_from).tokensToSend(_operator, _from, _to, _amount, _data, _operatorData)
     assert returnValue == method_id("tokensToSend(address,address,address,uint256,bytes,bytes)", bytes32)
 
 
-# TODO: verify that this check actually works
+# TODO: verify that this check works
 @private
 @constant
 def _checkForERC777TokensInterface_Recipient(_operator: address,
@@ -198,7 +197,6 @@ def _checkForERC777TokensInterface_Recipient(_operator: address,
                                              _operatorData: bytes[256]=""
                                             ):
     # check if recipient implements the `ER777TokenRecipient` interface via ERC820
-    # TODO: check if function paramters are correct (next 2 lines)
     # NOTE: This makes the call (call executes) and returns the bytestring.
     returnValue: bytes32 = ERC777TokensRecipient(_to).tokensReceived(_operator, _from, _to, _amount, _data, _operatorData)
     assert returnValue == method_id("tokensReceived(address,address,address,uint256,bytes,bytes)", bytes32)
