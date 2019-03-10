@@ -46,6 +46,13 @@ Transfer: event({
 })
 
 
+# NOTE: This is not part of the standard
+Mint: event({
+    _to: indexed(address),
+    _tokenId: indexed(uint256)
+})
+
+
 # @dev This emits when the approved address for an NFT is changed or reaffirmed.
 #      The zero address indicates there is no approved address.
 #      When a Transfer event emits, this also indicates that the approved
@@ -68,6 +75,10 @@ ApprovalForAll: event({
 
 # STATE VARIABLES:
 
+# NOTE: This is not part of the standard
+contractOwner: public(address)
+nftSupply: public(uint256)
+
 nftCount: public(map(address, uint256))
 ownerOfNFT: public(map(uint256, address))
 
@@ -85,12 +96,16 @@ ERC721_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000
 # METHODS:
 @public
 def __init__():
+    # set contract owner
+    # NOTE: This is not part of the standard
+    #       contractOwner can call mint()
+    self.contractOwner = msg.sender
+    self.nftSupply = 0
     # set supported interfaces
     self.supportedInterfaces[ERC165_INTERFACE_ID] = True
     self.supportedInterfaces[ERC721_INTERFACE_ID] = True
 
 
-# TODO: shorten name
 @private
 def _checkIfIsOwnerOrOperatorOrApprovedForAll(_msgSender: address, _from: address, _tokenId: uint256):
     # Throws unless `msg.sender` is
@@ -301,3 +316,20 @@ def getApproved(_tokenId: uint256) -> address:
 @constant
 def isApprovedForAll(_owner: address, _operator: address) -> bool:
     return self.approvedForAll[_owner][_operator]
+
+
+# NOTE: This is not part of the standard
+@public
+def mint() -> uint256:
+    # only contractOwner is allowed to mint
+    assert msg.sender == self.contractOwner
+    # update supply
+    tokenId: uint256 = self.nftSupply
+    self.nftSupply += 1
+    # update ownership
+    self.ownerOfNFT[tokenId] = msg.sender
+    self.nftCount[msg.sender] += 1
+    self.operatorFor[tokenId] = ZERO_ADDRESS
+    # log mint
+    log.Mint(msg.sender, tokenId)
+    return tokenId
