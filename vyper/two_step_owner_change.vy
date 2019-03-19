@@ -76,11 +76,11 @@ def change_owner(_newOwner: address):
 
 
 @public
-def set_time_window(_new_duration: timedelta):
+def set_time_window(_newDuration: timedelta):
     # _new_duration [in number of seconds]
     # check if sender is allowed to make this change
     assert self.owner == msg.sender
     # reset 1. step flag
     self.flag_init = False
     # update the allowed time frame between 1. step and 2. step
-    self.window = _new_duration
+    self.window = _newDuration
