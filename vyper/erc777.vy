@@ -97,8 +97,6 @@ ERC165_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000
 
 
 # METHODS:
-# TODO:
-# see: https://github.com/ethereum/vyper/issues/1332
 @public
 def __init__(_name: string[32],
              _symbol: string[16],
