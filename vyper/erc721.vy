@@ -215,7 +215,7 @@ def safeTransferFrom(_from: address, _to: address, _tokenId: uint256, _data: byt
     if _to.is_contract:
         # If so, it calls `onERC721Received` on `_to` and throws if the return value is not
         # `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
-        returnValue: bytes32 = ERC721TokenReceiver(_to).onERC721Received(_from, _to, _tokenId, _data)
+        returnValue: bytes32 = ERC721TokenReceiver(_to).onERC721Received(msg.sender, _from, _tokenId, _data)
         assert returnValue == method_id("onERC721Received(address,address,uint256,bytes)", bytes32)
 
 
