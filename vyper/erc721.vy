@@ -4,8 +4,6 @@
 # ERC721 Token Standard
 # https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
 
-# ATTENTION: This is a work in progress!!
-
 # @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
 # @notice Handle the receipt of an NFT
 # @dev The ERC721 smart contract calls this function on the recipient
