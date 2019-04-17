@@ -176,6 +176,7 @@ def balanceOf(_owner: address) -> uint256:
 def ownerOf(_owner: uint256) -> address:
     # NFTs assigned to the zero address are considered invalid, and this
     # function throws for queries about the zero address.
+    assert _owner != ZERO_ADDRESS
     owner: address = self.ownerOfNFT[_owner]
     assert owner != ZERO_ADDRESS
     return owner
