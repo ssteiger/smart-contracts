@@ -96,7 +96,7 @@ ERC721_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000
 def __init__():
     # set contract owner
     # NOTE: This is not part of the standard
-    #       contractOwner can call mint()
+    #       only contractOwner can call mint()
     self.contractOwner = msg.sender
     self.nftSupply = 0
     # set supported interfaces
