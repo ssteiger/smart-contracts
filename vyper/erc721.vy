@@ -265,6 +265,8 @@ def transferFrom(_from: address, _to: address, _tokenId: uint256):
 @public
 @payable
 def approve(_approved: address, _tokenId: uint256):
+    # Throws if _tokenId is not owned / a valid NFT
+    assert self.ownerOfNFT[_tokenId] != ZERO_ADDRESS
     # Throws unless `msg.sender` is the current NFT owner
     isOwner: bool = self.ownerOfNFT[_tokenId] == msg.sender
     # or an authorized operator of the current owner.
