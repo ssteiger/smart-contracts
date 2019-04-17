@@ -114,7 +114,7 @@ def _checkIfIsOwnerOrOperatorOrApprovedForAll(_msgSender: address, _from: addres
     # an authorized operator
     isOperator: bool = self.operatorFor[_tokenId] == _msgSender
     # or the approved address for this NFT
-    isApprovedForAll: bool = self.approvedForAll[_from][_msgSender]
+    isApprovedForAll: bool = (self.approvedForAll[_from])[_msgSender]
     assert (isOwner or isOperator or isApprovedForAll)
 
 
@@ -286,7 +286,7 @@ def approve(_approved: address, _tokenId: uint256):
 # function setApprovalForAll(address _operator, bool _approved) external;
 @public
 def setApprovalForAll(_operator: address, _approved: bool):
-    # TODO: The contract MUST allow multiple operators per owner.
+    # The contract MUST allow multiple operators per owner.
     self.approvedForAll[msg.sender][_operator] = _approved
     # log change
     log.ApprovalForAll(msg.sender, _operator, _approved)
@@ -315,7 +315,7 @@ def getApproved(_tokenId: uint256) -> address:
 @public
 @constant
 def isApprovedForAll(_owner: address, _operator: address) -> bool:
-    return self.approvedForAll[_owner][_operator]
+    return (self.approvedForAll[_owner])[_operator]
 
 
 # NOTE: This is not part of the standard
