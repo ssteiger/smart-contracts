@@ -62,24 +62,24 @@ def removeOperator(_operator: address) -> bool:
 # ---------  white/black list methods ---------
 @public
 def addToWhiteList(_candidate: address) -> bool:
-    assert self.operators[msg.sender]
+    assert msg.sender == self.owner
     self.whiteList[_candidate] = True
     return True
 
 @public
 def removeFromWhiteList(_candidate: address) -> bool:
-    assert self.operators[msg.sender]
+    assert msg.sender == self.owner
     self.whiteList[_candidate] = False
     return True
 
 @public
 def addToBlackList(_candidate: address) -> bool:
-    assert self.operators[msg.sender]
+    assert msg.sender == self.owner
     self.blackList[_candidate] = True
     return True
 
 @public
 def removeFromBlackList(_candidate: address) -> bool:
-    assert self.operators[msg.sender]
+    assert msg.sender == self.owner
     self.blackList[_candidate] = False
     return True
