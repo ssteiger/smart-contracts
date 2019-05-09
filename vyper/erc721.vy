@@ -173,10 +173,10 @@ def balanceOf(_owner: address) -> uint256:
 # function ownerOf(uint256 _tokenId) external view returns (address);
 @public
 @constant
-def ownerOf(_owner: uint256) -> address:
+def ownerOf(_tokenId: uint256) -> address:
     # NFTs assigned to the zero address are considered invalid, and this
     # function throws for queries about the zero address.
-    owner: address = self.ownerOfNFT[_owner]
+    owner: address = self.ownerOfNFT[_tokenId]
     assert owner != ZERO_ADDRESS
     return owner
 
