@@ -46,22 +46,13 @@ def __default__():
 
 @private
 def _calculateNewSolution(_x1: uint256, _x2: uint256) -> uint256:
-    # constraints
-    maxForks: uint256
-    maxSteaks: uint256
-    coreChefs: uint256
-    proofOfSteakTime: uint256
-    customerPatients: uint256
-    maxForks = 100
-    maxSteaks = 100
-    coreChefs = 5
-    proofOfSteakTime = 2
-    customerPatients = 50
-    # check constraints against new parameters
-    assert maxForks < _x1*2 + _x2*2
-    assert maxSteaks < _x1*13 + _x2*14
+    # check new parameters against constraints
+    assert _x1 <= 4
+    assert 2 * _x2 <= 12
+    assert (3 * _x1) + (2 * _x2) <= 18
+    assert _x1 > 0 and _x2 > 0
     # calculate and return new solution
-    return (5 * _x1) + (6 * _x2)
+    return (3 * _x1) + (5 * _x2)
 
 
 @public
@@ -69,6 +60,7 @@ def submitSolution(_x1: uint256, _x2: uint256) -> uint256:
     newSolution: uint256
     newSolution = self._calculateNewSolution(_x1, _x2)
     assert newSolution > self.bestSolution
+    # save the solution and it's values
     self.x1 = _x1
     self.x2 = _x2
     self.bestSolution = newSolution
